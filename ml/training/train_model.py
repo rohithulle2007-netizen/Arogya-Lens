@@ -1,6 +1,6 @@
 """
-Arogya Lens — Optimized Model Training & Artifact Export Script
-Trains an ensemble regression pipeline on the clean multi-sample clinical dataset
+Arogya Lens — Multi-Cohort Model Training & Artifact Export Script
+Trains an ensemble regression pipeline on the Kaggle 'eyes-defy-anemia' clinical dataset (India & Italy cohorts)
 and exports calibrated weights to ml/models/ and backend/app/ai/models/.
 """
 import argparse
@@ -33,11 +33,11 @@ def train_and_export_model(
     metadata_output: Optional[str] = None
 ) -> Dict[str, Any]:
     """
-    Trains the calibrated ensemble model on the full clinical dataset and saves artifacts.
+    Trains the calibrated ensemble model on the multi-cohort clinical dataset and saves artifacts.
     """
-    dataset_path = dataset_csv or os.path.join(base_dir, "ml", "training", "artifacts", "features_advanced_all_samples.csv")
+    dataset_path = dataset_csv or os.path.join(base_dir, "ml", "training", "artifacts", "features_eyes_defy_anemia.csv")
     if not os.path.exists(dataset_path):
-        dataset_path = os.path.join(base_dir, "ml", "training", "artifacts", "features_extracted.csv")
+        dataset_path = os.path.join(base_dir, "ml", "training", "artifacts", "features_advanced_all_samples.csv")
 
     print(f"Loading training dataset from: {dataset_path}")
     df = pd.read_csv(dataset_path)
@@ -55,31 +55,42 @@ def train_and_export_model(
             if mask.any():
                 df.loc[mask, col] = df.loc[mask, col] / 256.0
 
-    # Feature columns
-    feat_cols = [c for c in df.columns if c not in ['participant_id', 'sample_type', 'hb']]
+    # Feature columns (exclude non-feature metadata)
+    exclude_cols = ['participant_id', 'cohort', 'sample_type', 'hb', 'age', 'sex', 'roi_pixel_count', 'roi_quality_score']
+    feat_cols = [c for c in df.columns if c not in exclude_cols]
+    
+    # Also include normalized age and sex if available
+    if 'age' in df.columns and 'age' not in feat_cols:
+        feat_cols.append('age')
+    if 'sex' in df.columns and 'sex' not in feat_cols:
+        df['sex_encoded'] = df['sex'].map(lambda s: 1.0 if str(s).upper().startswith('M') else 0.0)
+        feat_cols.append('sex_encoded')
+
     groups = df['participant_id'].values
     X = df[feat_cols].values
     y = df['hb'].values
 
     print(f"Dataset summary: {df['participant_id'].nunique()} unique participants, {len(df)} total samples, {len(feat_cols)} features")
+    print(f"Cohorts represented: {df['cohort'].value_counts().to_dict() if 'cohort' in df.columns else 'N/A'}")
 
-    # Build optimized, scale-invariant ensemble pipeline
-    k_features = min(22, len(feat_cols))
+    # Build scale-invariant ensemble pipeline
+    k_features = min(24, len(feat_cols))
     pipeline = Pipeline([
         ('scaler', RobustScaler()),
         ('select', SelectKBest(score_func=f_regression, k=k_features)),
         ('regressor', VotingRegressor([
-            ('et', ExtraTreesRegressor(n_estimators=150, max_depth=6, min_samples_split=3, random_state=42)),
-            ('rf', RandomForestRegressor(n_estimators=150, max_depth=5, min_samples_split=3, random_state=42)),
-            ('svr', SVR(C=2.5, epsilon=0.15, kernel='rbf', gamma='scale'))
+            ('et', ExtraTreesRegressor(n_estimators=180, max_depth=7, min_samples_split=3, random_state=42)),
+            ('rf', RandomForestRegressor(n_estimators=180, max_depth=6, min_samples_split=3, random_state=42)),
+            ('svr', SVR(C=3.0, epsilon=0.12, kernel='rbf', gamma='scale'))
         ]))
     ])
 
     # 5-Fold GroupKFold Cross-Validation evaluation
-    gkf = GroupKFold(n_splits=5)
+    n_splits = min(5, df['participant_id'].nunique())
+    gkf = GroupKFold(n_splits=n_splits)
     oof_preds = np.zeros(len(df))
 
-    print("\nRunning 5-Fold Participant GroupKFold Validation...")
+    print(f"\nRunning {n_splits}-Fold Participant GroupKFold Validation...")
     for fold, (train_idx, val_idx) in enumerate(gkf.split(X, y, groups=groups)):
         pipeline.fit(X[train_idx], y[train_idx])
         oof_preds[val_idx] = pipeline.predict(X[val_idx])
@@ -95,7 +106,7 @@ def train_and_export_model(
     print(f"  • Validation R²: {cv_r2:.3f}")
     print(f"  • Pearson Correlation r: {cv_corr:.3f}")
 
-    # Train final model on entire dataset
+    # Train final model on entire multi-cohort dataset
     pipeline.fit(df[feat_cols], y)
 
     # Save model weights to destination paths
@@ -111,9 +122,11 @@ def train_and_export_model(
 
     # Metadata dictionary
     meta_dict = {
-        "dataset_version": "India_Conjunctiva_Clinical_v2.5",
+        "dataset_name": "Kaggle eyes-defy-anemia (India + Italy Cohorts)",
+        "dataset_version": "Eyes_Defy_Anemia_MultiCohort_v3.0",
         "num_participants": int(df["participant_id"].nunique()),
         "num_records": int(len(df)),
+        "cohorts": df["cohort"].value_counts().to_dict() if "cohort" in df.columns else {},
         "hb_target_summary": {
             "min": float(round(df["hb"].min(), 2)),
             "max": float(round(df["hb"].max(), 2)),
@@ -123,7 +136,7 @@ def train_and_export_model(
         "model_type": "Calibrated VotingRegressor (ExtraTrees + RandomForest + SVR RBF with RobustScaler)",
         "feature_names": feat_cols,
         "selected_k_features": k_features,
-        "validation_method": "5-Fold GroupKFold (grouped by participant_id)",
+        "validation_method": f"{n_splits}-Fold GroupKFold (grouped by participant_id)",
         "cv_metrics": {
             "participant_mae": round(cv_mae, 3),
             "participant_rmse": round(cv_rmse, 3),

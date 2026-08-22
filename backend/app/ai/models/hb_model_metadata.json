@@ -1,12 +1,17 @@
 {
-  "dataset_version": "India_Conjunctiva_Clinical_v2.5",
-  "num_participants": 95,
-  "num_records": 380,
+  "dataset_name": "Kaggle eyes-defy-anemia (India + Italy Cohorts)",
+  "dataset_version": "Eyes_Defy_Anemia_MultiCohort_v3.0",
+  "num_participants": 217,
+  "num_records": 529,
+  "cohorts": {
+    "India": 285,
+    "Italy": 244
+  },
   "hb_target_summary": {
-    "min": 7.6,
-    "max": 17.1,
-    "mean": 11.472,
-    "std": 2.067
+    "min": 7.0,
+    "max": 17.4,
+    "mean": 12.559,
+    "std": 2.365
   },
   "model_type": "Calibrated VotingRegressor (ExtraTrees + RandomForest + SVR RBF with RobustScaler)",
   "feature_names": [
@@ -54,17 +59,17 @@
     "erythema_a_l",
     "erythema_cr_y",
     "age",
-    "sex"
+    "sex_encoded"
   ],
-  "selected_k_features": 22,
+  "selected_k_features": 24,
   "validation_method": "5-Fold GroupKFold (grouped by participant_id)",
   "cv_metrics": {
-    "participant_mae": 1.255,
-    "participant_rmse": 1.574,
-    "participant_r2": 0.419,
-    "participant_pearson_r": 0.647
+    "participant_mae": 1.356,
+    "participant_rmse": 1.75,
+    "participant_r2": 0.452,
+    "participant_pearson_r": 0.672
   },
-  "training_timestamp": "2026-08-22T06:09:38.961471+00:00",
+  "training_timestamp": "2026-08-22T09:02:11.591949+00:00",
   "software_versions": {
     "python": "3.14.6",
     "scikit-learn": "1.9.0",
