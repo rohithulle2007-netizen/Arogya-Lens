@@ -42,18 +42,31 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       setStep("otp");
       Alert.alert("OTP Sent", "Default development OTP is 123456.");
     } catch (err: any) {
-      Alert.alert(
-        "Connection Error",
-        `Could not reach backend at:\n${apiUrl}\n\nMake sure backend is running or tap 'Server Config' to update IP.`,
-        [
-          { text: "Server Config", onPress: () => setShowConfigModal(true) },
-          { text: "OK" }
-        ]
-      );
+      const msg = err.message || "";
+      if (msg.toLowerCase().includes("not registered") || msg.toLowerCase().includes("register")) {
+        Alert.alert(
+          "Unregistered Mobile Number",
+          "This number is not registered yet. Would you like to create an account?",
+          [
+            { text: "Register Now", onPress: () => navigation.navigate("Register") },
+            { text: "Cancel", style: "cancel" }
+          ]
+        );
+      } else {
+        Alert.alert(
+          "Connection Error",
+          `Could not reach backend at:\n${apiUrl}\n\nError: ${msg}\n\nTap 'Server Config' to update your laptop's WiFi IP address.`,
+          [
+            { text: "Server Config", onPress: () => setShowConfigModal(true) },
+            { text: "OK" }
+          ]
+        );
+      }
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleVerifyOtp = async () => {
     if (!otp.trim()) {
