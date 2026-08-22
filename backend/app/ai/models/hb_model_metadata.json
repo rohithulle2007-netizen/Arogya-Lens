@@ -1,27 +1,14 @@
 {
-  "dataset_version": "India_Conjunctiva_95Patients_v2.0",
+  "dataset_version": "India_Conjunctiva_Clinical_v2.5",
   "num_participants": 95,
   "num_records": 380,
-  "sample_breakdown": {
-    "both_conjunctiva_masks": 95,
-    "palpebral_masks": 95,
-    "forniceal_masks": 95,
-    "raw_auto_segmented": 95
-  },
   "hb_target_summary": {
     "min": 7.6,
     "max": 17.1,
     "mean": 11.472,
     "std": 2.067
   },
-  "model_type": "RandomForestRegressor (150 trees, k=18 SelectKBest)",
-  "validation_method": "5-Fold GroupKFold (grouped by participant_id)",
-  "cv_metrics": {
-    "participant_mae": 1.204,
-    "participant_rmse": 1.517,
-    "participant_r2": 0.46,
-    "participant_pearson_r": 0.679
-  },
+  "model_type": "Calibrated VotingRegressor (ExtraTrees + RandomForest + SVR RBF with RobustScaler)",
   "feature_names": [
     "rgb_r_mean",
     "rgb_g_mean",
@@ -69,5 +56,18 @@
     "age",
     "sex"
   ],
-  "training_timestamp": "2026-08-21T19:26:17.815995+00:00"
+  "selected_k_features": 22,
+  "validation_method": "5-Fold GroupKFold (grouped by participant_id)",
+  "cv_metrics": {
+    "participant_mae": 1.255,
+    "participant_rmse": 1.574,
+    "participant_r2": 0.419,
+    "participant_pearson_r": 0.647
+  },
+  "training_timestamp": "2026-08-22T06:09:38.961471+00:00",
+  "software_versions": {
+    "python": "3.14.6",
+    "scikit-learn": "1.9.0",
+    "joblib": "1.5.3"
+  }
 }

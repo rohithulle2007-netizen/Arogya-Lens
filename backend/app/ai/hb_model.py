@@ -98,22 +98,26 @@ class HbModelWrapper:
     def get_screening_status(estimated_hb: float, sex: Optional[str] = None) -> Tuple[str, str]:
         """
         Returns screening classification and descriptive status message.
-        Follows standard WHO screening thresholds.
+        Follows standard WHO screening thresholds:
+        - Normal: >= 12.0 g/dL (or >= 11.5 g/dL adult female baseline)
+        - Mild / Borderline Anemia: 11.0 - 11.9 g/dL (or 11.0 - 12.4 g/dL male)
+        - Moderate Anemia: 8.0 - 10.9 g/dL
+        - Severe Anemia / High Risk: < 8.0 g/dL
         """
         is_male = str(sex).strip().upper().startswith("M") if sex else False
 
         if estimated_hb < 8.0:
             status = "severe_anemia"
             msg = f"Estimated Hb is {estimated_hb:.1f} g/dL, indicating significantly low hemoglobin. Prompt clinical consultation recommended."
-        elif estimated_hb < 11.0:
+        elif estimated_hb < 10.5:
             status = "moderate_anemia"
             msg = f"Estimated Hb is {estimated_hb:.1f} g/dL, indicating moderate hemoglobin deficiency. Clinical evaluation recommended."
-        elif (is_male and estimated_hb < 13.0) or (not is_male and estimated_hb < 12.0):
+        elif (is_male and estimated_hb < 12.5) or (not is_male and estimated_hb < 11.5):
             status = "mild_anemia"
-            msg = f"Estimated Hb is {estimated_hb:.1f} g/dL, suggesting mild anemia. Routine confirmation recommended."
+            msg = f"Estimated Hb is {estimated_hb:.1f} g/dL, suggesting borderline/mild anemia. Routine follow-up recommended."
         else:
-            status = "normal"
-            msg = f"Estimated Hb is {estimated_hb:.1f} g/dL, within normal physiological range."
+            status = "likely_normal"
+            msg = f"Estimated Hb is {estimated_hb:.1f} g/dL, within normal healthy range."
 
         return status, msg
 
