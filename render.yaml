@@ -1,0 +1,30 @@
+# ==============================================================================
+# Arogya Lens — Render Infrastructure as Code Blueprint
+# Deploys the FastAPI backend with OpenCV, ML ensemble models, and persistent storage
+# ==============================================================================
+services:
+  - type: web
+    name: arogya-lens-backend
+    env: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    region: oregon
+    branch: main
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_NAME
+        value: Arogya Lens API
+      - key: APP_VERSION
+        value: 1.0.0
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: "*"
+      - key: DATABASE_URL
+        value: sqlite:////app/data/arogya_lens.db
+      - key: UPLOAD_DIR
+        value: /app/data/uploads
+    disk:
+      name: arogya-lens-storage
+      mountPath: /app/data
+      sizeGB: 1
