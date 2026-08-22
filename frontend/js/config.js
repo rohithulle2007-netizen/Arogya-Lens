@@ -5,12 +5,19 @@
 
 const getApiBaseUrl = () => {
   if (window.__API_BASE_URL__) return window.__API_BASE_URL__;
+  const storedUrl = localStorage.getItem('arogya_api_base_url');
+  if (storedUrl) return storedUrl;
+
   const hostname = window.location.hostname || '127.0.0.1';
   // If backend is serving frontend directly on port 8000
   if (window.location.port === '8000') {
     return window.location.origin;
   }
-  // Otherwise point to backend on port 8000 matching current hostname (e.g. localhost or 127.0.0.1)
+  // If running locally
+  if (hostname === 'localhost' || hostname === '127.0.0.1') {
+    return `http://${hostname}:8000`;
+  }
+  // Default to relative or current host on port 8000
   return `http://${hostname}:8000`;
 };
 
