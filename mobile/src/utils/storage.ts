@@ -1,10 +1,23 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
 
 const TOKEN_KEY = "@arogya_token";
 const USER_KEY = "@arogya_user";
 const API_URL_KEY = "@arogya_api_url";
 
-export const DEFAULT_API_URL = "http://127.0.0.1:8000";
+export const getDynamicDefaultApiUrl = (): string => {
+  // Extract host from Expo Metro connection if available
+  const hostUri = Constants.expoConfig?.hostUri || (Constants as any).manifest2?.extra?.expoClient?.hostUri;
+  if (hostUri) {
+    const host = hostUri.split(":")[0];
+    if (host && !host.includes("exp.direct") && !host.includes("localhost") && host !== "127.0.0.1") {
+      return `http://${host}:8000`;
+    }
+  }
+  return "http://10.127.173.92:8000";
+};
+
+export const DEFAULT_API_URL = getDynamicDefaultApiUrl();
 
 export const Storage = {
   async getToken(): Promise<string | null> {
@@ -30,7 +43,7 @@ export const Storage = {
 
   async getApiUrl(): Promise<string> {
     const url = await AsyncStorage.getItem(API_URL_KEY);
-    return url || DEFAULT_API_URL;
+    return url || getDynamicDefaultApiUrl();
   },
   async setApiUrl(url: string): Promise<void> {
     await AsyncStorage.setItem(API_URL_KEY, url.trim().replace(/\/$/, ""));

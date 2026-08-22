@@ -35,7 +35,9 @@
         {
           "cameraPermission": "Allow Arogya Lens to access your camera to scan eye conjunctiva and nail bed."
         }
-      ]
+      ],
+      "expo-asset",
+      "expo-font"
     ]
   }
 }

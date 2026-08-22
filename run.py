@@ -1,6 +1,6 @@
 """
 Arogya Lens — Unified Server Launcher
-Runs FastAPI backend and serves the integrated Vanilla JavaScript frontend.
+Runs FastAPI backend on 0.0.0.0 to allow both Web App and Mobile (Expo) connectivity.
 """
 import os
 import sys
@@ -16,13 +16,14 @@ sys.path.insert(0, ml_dir)
 if __name__ == "__main__":
     print("==================================================")
     print("🚀 Arogya Lens Unified Server Starting")
-    print("📍 Web Application: http://127.0.0.1:8000/")
+    print("📍 Local Web App: http://127.0.0.1:8000/")
+    print("📍 Network Access: http://0.0.0.0:8000/ (LAN Ready)")
     print("📍 Interactive API Docs: http://127.0.0.1:8000/docs")
     print("📍 Service Health: http://127.0.0.1:8000/api/health")
     print("==================================================")
     uvicorn.run(
         "app.main:app",
-        host="127.0.0.1",
+        host="0.0.0.0",
         port=8000,
         reload=True,
         app_dir=backend_dir

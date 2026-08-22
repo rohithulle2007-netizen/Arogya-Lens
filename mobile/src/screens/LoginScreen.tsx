@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -10,15 +10,26 @@ import {
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  Modal,
 } from "react-native";
 import { Colors } from "../theme/colors";
 import { API } from "../api/client";
+import { Storage, DEFAULT_API_URL } from "../utils/storage";
 
 export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   const [mobile, setMobile] = useState("9876543210");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<"phone" | "otp">("phone");
   const [loading, setLoading] = useState(false);
+  const [apiUrl, setApiUrl] = useState(DEFAULT_API_URL);
+  const [showConfigModal, setShowConfigModal] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      const saved = await Storage.getApiUrl();
+      setApiUrl(saved);
+    })();
+  }, []);
 
   const handleSendOtp = async () => {
     if (!/^\d{10}$/.test(mobile.trim())) {
@@ -31,7 +42,14 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
       setStep("otp");
       Alert.alert("OTP Sent", "Default development OTP is 123456.");
     } catch (err: any) {
-      Alert.alert("Error", err.message || "Could not send OTP. Check backend connection in settings.");
+      Alert.alert(
+        "Connection Error",
+        `Could not reach backend at:\n${apiUrl}\n\nMake sure backend is running or tap 'Server Config' to update IP.`,
+        [
+          { text: "Server Config", onPress: () => setShowConfigModal(true) },
+          { text: "OK" }
+        ]
+      );
     } finally {
       setLoading(false);
     }
@@ -56,20 +74,44 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
     }
   };
 
+  const handleSaveApiUrl = async () => {
+    if (!apiUrl.trim().startsWith("http")) {
+      Alert.alert("Invalid URL", "URL must begin with http:// or https://");
+      return;
+    }
+    await Storage.setApiUrl(apiUrl.trim());
+    setShowConfigModal(false);
+    Alert.alert("Updated", `Backend target set to:\n${apiUrl.trim()}`);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.inner}
       >
-        <TouchableOpacity style={styles.backBtn} onPress={() => (step === "otp" ? setStep("phone") : navigation.goBack())}>
-          <Text style={styles.backText}>← Back</Text>
-        </TouchableOpacity>
+        <View style={styles.topBar}>
+          <TouchableOpacity
+            style={styles.backBtn}
+            onPress={() => (step === "otp" ? setStep("phone") : navigation.goBack())}
+          >
+            <Text style={styles.backText}>← Back</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.serverPill}
+            onPress={() => setShowConfigModal(true)}
+          >
+            <Text style={styles.serverPillText}>⚙️ Server IP</Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.header}>
           <Text style={styles.title}>Mobile Login</Text>
           <Text style={styles.subtitle}>
-            {step === "phone" ? "Enter your registered mobile number to receive OTP" : `Enter the 6-digit code sent to +91 ${mobile}`}
+            {step === "phone"
+              ? "Enter your registered mobile number to receive OTP"
+              : `Enter the 6-digit code sent to +91 ${mobile}`}
           </Text>
         </View>
 
@@ -114,12 +156,17 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             {loading ? (
               <ActivityIndicator color="#ffffff" />
             ) : (
-              <Text style={styles.submitBtnText}>{step === "phone" ? "Send OTP Code" : "Verify & Sign In"}</Text>
+              <Text style={styles.submitBtnText}>
+                {step === "phone" ? "Send OTP Code" : "Verify & Sign In"}
+              </Text>
             )}
           </TouchableOpacity>
 
           {step === "phone" && (
-            <TouchableOpacity style={styles.switchBtn} onPress={() => navigation.navigate("Register")}>
+            <TouchableOpacity
+              style={styles.switchBtn}
+              onPress={() => navigation.navigate("Register")}
+            >
               <Text style={styles.switchText}>
                 Don't have an account? <Text style={styles.switchHighlight}>Register here</Text>
               </Text>
@@ -127,6 +174,40 @@ export const LoginScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
           )}
         </View>
       </KeyboardAvoidingView>
+
+      {/* Server Config Modal */}
+      <Modal visible={showConfigModal} transparent animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Backend Server Configuration</Text>
+            <Text style={styles.modalDesc}>
+              Enter your computer's local WiFi IP (e.g. http://10.127.173.92:8000 or http://192.168.x.x:8000) or production cloud URL:
+            </Text>
+            <TextInput
+              style={styles.modalInput}
+              value={apiUrl}
+              onChangeText={setApiUrl}
+              autoCapitalize="none"
+              autoCorrect={false}
+              placeholder="http://10.127.173.92:8000"
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={styles.modalCancelBtn}
+                onPress={() => setShowConfigModal(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.modalSaveBtn}
+                onPress={handleSaveApiUrl}
+              >
+                <Text style={styles.modalSaveText}>Save Server</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -141,19 +222,35 @@ const styles = StyleSheet.create({
     padding: 24,
     justifyContent: "center",
   },
+  topBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
   backBtn: {
-    position: "absolute",
-    top: 20,
-    left: 20,
-    padding: 8,
+    padding: 4,
   },
   backText: {
     color: Colors.primary,
     fontWeight: "700",
     fontSize: 15,
   },
+  serverPill: {
+    backgroundColor: Colors.primarySurface,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.primaryBorder,
+  },
+  serverPillText: {
+    color: Colors.primaryDark,
+    fontSize: 12,
+    fontWeight: "700",
+  },
   header: {
-    marginBottom: 32,
+    marginBottom: 28,
   },
   title: {
     fontSize: 28,
@@ -235,6 +332,63 @@ const styles = StyleSheet.create({
   },
   switchHighlight: {
     color: Colors.primary,
+    fontWeight: "700",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(15, 23, 42, 0.6)",
+    justifyContent: "center",
+    padding: 24,
+  },
+  modalCard: {
+    backgroundColor: Colors.card,
+    borderRadius: 20,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: Colors.textMain,
+    marginBottom: 6,
+  },
+  modalDesc: {
+    fontSize: 12,
+    color: Colors.textMuted,
+    lineHeight: 17,
+    marginBottom: 14,
+  },
+  modalInput: {
+    backgroundColor: Colors.borderLight,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    paddingHorizontal: 12,
+    height: 46,
+    fontSize: 14,
+    color: Colors.textMain,
+    marginBottom: 16,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+  },
+  modalCancelBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  modalCancelText: {
+    color: Colors.textMuted,
+    fontWeight: "600",
+  },
+  modalSaveBtn: {
+    backgroundColor: Colors.primary,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+  },
+  modalSaveText: {
+    color: "#ffffff",
     fontWeight: "700",
   },
 });
