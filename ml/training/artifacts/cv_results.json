@@ -1,0 +1,522 @@
+[
+  {
+    "model_name": "Ridge",
+    "feature_config": "MODEL A (Color Only)",
+    "features_count": 24,
+    "oof_mae": 4.1231,
+    "oof_rmse": 26.9502,
+    "oof_r2": -169.373,
+    "oof_pearson_r": -0.1512,
+    "oof_spearman_rho": 0.5065,
+    "mean_cv_mae": 4.1231,
+    "std_cv_mae": 5.4764,
+    "mean_cv_rmse": 13.4616,
+    "std_cv_rmse": 23.3474,
+    "mean_cv_r2": -190.4444,
+    "fold_metrics": [
+      {
+        "mae": 1.3207,
+        "rmse": 1.8313,
+        "r2": -0.0136,
+        "pearson_r": 0.5285,
+        "spearman_rho": 0.6394
+      },
+      {
+        "mae": 1.6383,
+        "rmse": 2.2267,
+        "r2": 0.2858,
+        "pearson_r": 0.7009,
+        "spearman_rho": 0.7108
+      },
+      {
+        "mae": 1.1623,
+        "rmse": 1.4139,
+        "r2": -0.0349,
+        "pearson_r": 0.413,
+        "spearman_rho": 0.4614
+      },
+      {
+        "mae": 15.0716,
+        "rmse": 60.1534,
+        "r2": -952.8461,
+        "pearson_r": -0.4057,
+        "spearman_rho": 0.3487
+      },
+      {
+        "mae": 1.4226,
+        "rmse": 1.6828,
+        "r2": 0.3867,
+        "pearson_r": 0.6775,
+        "spearman_rho": 0.6719
+      }
+    ]
+  },
+  {
+    "model_name": "Huber",
+    "feature_config": "MODEL A (Color Only)",
+    "features_count": 24,
+    "oof_mae": 16.8289,
+    "oof_rmse": 150.0436,
+    "oof_r2": -5279.9313,
+    "oof_pearson_r": -0.1691,
+    "oof_spearman_rho": 0.4554,
+    "mean_cv_mae": 16.8289,
+    "std_cv_mae": 30.7475,
+    "mean_cv_rmse": 68.591,
+    "std_cv_rmse": 133.4479,
+    "mean_cv_r2": -5933.5206,
+    "fold_metrics": [
+      {
+        "mae": 1.3218,
+        "rmse": 1.7888,
+        "r2": 0.0329,
+        "pearson_r": 0.4717,
+        "spearman_rho": 0.6342
+      },
+      {
+        "mae": 2.2307,
+        "rmse": 2.7791,
+        "r2": -0.1125,
+        "pearson_r": 0.3748,
+        "spearman_rho": 0.387
+      },
+      {
+        "mae": 1.0369,
+        "rmse": 1.3221,
+        "r2": 0.0952,
+        "pearson_r": 0.4893,
+        "spearman_rho": 0.5088
+      },
+      {
+        "mae": 78.3184,
+        "rmse": 335.485,
+        "r2": -29668.0778,
+        "pearson_r": -0.4124,
+        "spearman_rho": 0.354
+      },
+      {
+        "mae": 1.2367,
+        "rmse": 1.5798,
+        "r2": 0.4594,
+        "pearson_r": 0.6968,
+        "spearman_rho": 0.714
+      }
+    ]
+  },
+  {
+    "model_name": "Random Forest",
+    "feature_config": "MODEL A (Color Only)",
+    "features_count": 24,
+    "oof_mae": 1.331,
+    "oof_rmse": 1.6992,
+    "oof_r2": 0.3227,
+    "oof_pearson_r": 0.5704,
+    "oof_spearman_rho": 0.5758,
+    "mean_cv_mae": 1.3311,
+    "std_cv_mae": 0.1465,
+    "mean_cv_rmse": 1.6841,
+    "std_cv_rmse": 0.2263,
+    "mean_cv_r2": 0.2202,
+    "fold_metrics": [
+      {
+        "mae": 1.4473,
+        "rmse": 1.9142,
+        "r2": -0.1075,
+        "pearson_r": 0.4602,
+        "spearman_rho": 0.5542
+      },
+      {
+        "mae": 1.5293,
+        "rmse": 1.9914,
+        "r2": 0.4288,
+        "pearson_r": 0.7437,
+        "spearman_rho": 0.7293
+      },
+      {
+        "mae": 1.1078,
+        "rmse": 1.4658,
+        "r2": -0.1122,
+        "pearson_r": 0.4187,
+        "spearman_rho": 0.4702
+      },
+      {
+        "mae": 1.2686,
+        "rmse": 1.4535,
+        "r2": 0.4431,
+        "pearson_r": 0.6665,
+        "spearman_rho": 0.6807
+      },
+      {
+        "mae": 1.3023,
+        "rmse": 1.5956,
+        "r2": 0.4486,
+        "pearson_r": 0.6913,
+        "spearman_rho": 0.6579
+      }
+    ]
+  },
+  {
+    "model_name": "Gradient Boosting",
+    "feature_config": "MODEL A (Color Only)",
+    "features_count": 24,
+    "oof_mae": 1.3955,
+    "oof_rmse": 1.7465,
+    "oof_r2": 0.2845,
+    "oof_pearson_r": 0.5421,
+    "oof_spearman_rho": 0.5634,
+    "mean_cv_mae": 1.3955,
+    "std_cv_mae": 0.11,
+    "mean_cv_rmse": 1.7359,
+    "std_cv_rmse": 0.1927,
+    "mean_cv_r2": 0.1789,
+    "fold_metrics": [
+      {
+        "mae": 1.4579,
+        "rmse": 1.9131,
+        "r2": -0.1062,
+        "pearson_r": 0.4588,
+        "spearman_rho": 0.5806
+      },
+      {
+        "mae": 1.5322,
+        "rmse": 1.9975,
+        "r2": 0.4252,
+        "pearson_r": 0.7475,
+        "spearman_rho": 0.796
+      },
+      {
+        "mae": 1.2051,
+        "rmse": 1.4754,
+        "r2": -0.1269,
+        "pearson_r": 0.425,
+        "spearman_rho": 0.4439
+      },
+      {
+        "mae": 1.3631,
+        "rmse": 1.6142,
+        "r2": 0.3131,
+        "pearson_r": 0.5826,
+        "spearman_rho": 0.6526
+      },
+      {
+        "mae": 1.4193,
+        "rmse": 1.6791,
+        "r2": 0.3893,
+        "pearson_r": 0.6606,
+        "spearman_rho": 0.6474
+      }
+    ]
+  },
+  {
+    "model_name": "SVR (RBF)",
+    "feature_config": "MODEL A (Color Only)",
+    "features_count": 24,
+    "oof_mae": 1.3246,
+    "oof_rmse": 1.7581,
+    "oof_r2": 0.2749,
+    "oof_pearson_r": 0.5258,
+    "oof_spearman_rho": 0.5576,
+    "mean_cv_mae": 1.3246,
+    "std_cv_mae": 0.3113,
+    "mean_cv_rmse": 1.7225,
+    "std_cv_rmse": 0.3522,
+    "mean_cv_r2": 0.2288,
+    "fold_metrics": [
+      {
+        "mae": 1.446,
+        "rmse": 1.9295,
+        "r2": -0.1252,
+        "pearson_r": 0.3687,
+        "spearman_rho": 0.3496
+      },
+      {
+        "mae": 1.708,
+        "rmse": 2.2249,
+        "r2": 0.287,
+        "pearson_r": 0.6139,
+        "spearman_rho": 0.6301
+      },
+      {
+        "mae": 0.761,
+        "rmse": 1.1702,
+        "r2": 0.2912,
+        "pearson_r": 0.5984,
+        "spearman_rho": 0.6491
+      },
+      {
+        "mae": 1.3954,
+        "rmse": 1.7054,
+        "r2": 0.2333,
+        "pearson_r": 0.4859,
+        "spearman_rho": 0.5261
+      },
+      {
+        "mae": 1.3125,
+        "rmse": 1.5825,
+        "r2": 0.4576,
+        "pearson_r": 0.7173,
+        "spearman_rho": 0.7404
+      }
+    ]
+  },
+  {
+    "model_name": "Ridge",
+    "feature_config": "MODEL B (Color + Demographics)",
+    "features_count": 26,
+    "oof_mae": 1.5357,
+    "oof_rmse": 3.7752,
+    "oof_r2": -2.3432,
+    "oof_pearson_r": 0.3797,
+    "oof_spearman_rho": 0.675,
+    "mean_cv_mae": 1.5357,
+    "std_cv_mae": 0.7496,
+    "mean_cv_rmse": 2.7943,
+    "std_cv_rmse": 2.5386,
+    "mean_cv_r2": -2.7443,
+    "fold_metrics": [
+      {
+        "mae": 1.1915,
+        "rmse": 1.4833,
+        "r2": 0.3351,
+        "pearson_r": 0.665,
+        "spearman_rho": 0.6254
+      },
+      {
+        "mae": 1.4965,
+        "rmse": 2.0364,
+        "r2": 0.4027,
+        "pearson_r": 0.7539,
+        "spearman_rho": 0.7363
+      },
+      {
+        "mae": 0.9718,
+        "rmse": 1.2979,
+        "r2": 0.128,
+        "pearson_r": 0.58,
+        "spearman_rho": 0.5421
+      },
+      {
+        "mae": 2.9899,
+        "rmse": 7.8429,
+        "r2": -15.215,
+        "pearson_r": 0.4935,
+        "spearman_rho": 0.6869
+      },
+      {
+        "mae": 1.0289,
+        "rmse": 1.3109,
+        "r2": 0.6278,
+        "pearson_r": 0.8451,
+        "spearman_rho": 0.7842
+      }
+    ]
+  },
+  {
+    "model_name": "Huber",
+    "feature_config": "MODEL B (Color + Demographics)",
+    "features_count": 26,
+    "oof_mae": 22.0858,
+    "oof_rmse": 202.757,
+    "oof_r2": -9642.343,
+    "oof_pearson_r": -0.1689,
+    "oof_spearman_rho": 0.5779,
+    "mean_cv_mae": 22.0858,
+    "std_cv_mae": 41.6128,
+    "mean_cv_rmse": 91.9552,
+    "std_cv_rmse": 180.706,
+    "mean_cv_r2": -10835.9579,
+    "fold_metrics": [
+      {
+        "mae": 1.4194,
+        "rmse": 1.6474,
+        "r2": 0.1797,
+        "pearson_r": 0.5325,
+        "spearman_rho": 0.4532
+      },
+      {
+        "mae": 1.8494,
+        "rmse": 2.3419,
+        "r2": 0.21,
+        "pearson_r": 0.59,
+        "spearman_rho": 0.5704
+      },
+      {
+        "mae": 0.8804,
+        "rmse": 1.1601,
+        "r2": 0.3034,
+        "pearson_r": 0.6458,
+        "spearman_rho": 0.6211
+      },
+      {
+        "mae": 105.3086,
+        "rmse": 453.3662,
+        "r2": -54181.1382,
+        "pearson_r": -0.4125,
+        "spearman_rho": 0.3838
+      },
+      {
+        "mae": 0.9712,
+        "rmse": 1.2606,
+        "r2": 0.6558,
+        "pearson_r": 0.8559,
+        "spearman_rho": 0.8298
+      }
+    ]
+  },
+  {
+    "model_name": "Random Forest",
+    "feature_config": "MODEL B (Color + Demographics)",
+    "features_count": 26,
+    "oof_mae": 1.25,
+    "oof_rmse": 1.5727,
+    "oof_r2": 0.4198,
+    "oof_pearson_r": 0.649,
+    "oof_spearman_rho": 0.6742,
+    "mean_cv_mae": 1.25,
+    "std_cv_mae": 0.2018,
+    "mean_cv_rmse": 1.5522,
+    "std_cv_rmse": 0.253,
+    "mean_cv_r2": 0.3475,
+    "fold_metrics": [
+      {
+        "mae": 1.3512,
+        "rmse": 1.6868,
+        "r2": 0.1401,
+        "pearson_r": 0.5449,
+        "spearman_rho": 0.621
+      },
+      {
+        "mae": 1.5308,
+        "rmse": 1.9494,
+        "r2": 0.4526,
+        "pearson_r": 0.7354,
+        "spearman_rho": 0.7205
+      },
+      {
+        "mae": 1.0006,
+        "rmse": 1.2909,
+        "r2": 0.1373,
+        "pearson_r": 0.5519,
+        "spearman_rho": 0.5298
+      },
+      {
+        "mae": 1.331,
+        "rmse": 1.5573,
+        "r2": 0.3607,
+        "pearson_r": 0.6276,
+        "spearman_rho": 0.6983
+      },
+      {
+        "mae": 1.0363,
+        "rmse": 1.2766,
+        "r2": 0.647,
+        "pearson_r": 0.8432,
+        "spearman_rho": 0.807
+      }
+    ]
+  },
+  {
+    "model_name": "Gradient Boosting",
+    "feature_config": "MODEL B (Color + Demographics)",
+    "features_count": 26,
+    "oof_mae": 1.2629,
+    "oof_rmse": 1.5981,
+    "oof_r2": 0.4009,
+    "oof_pearson_r": 0.6342,
+    "oof_spearman_rho": 0.663,
+    "mean_cv_mae": 1.2628,
+    "std_cv_mae": 0.2548,
+    "mean_cv_rmse": 1.5642,
+    "std_cv_rmse": 0.3277,
+    "mean_cv_r2": 0.3568,
+    "fold_metrics": [
+      {
+        "mae": 1.3968,
+        "rmse": 1.6658,
+        "r2": 0.1613,
+        "pearson_r": 0.5587,
+        "spearman_rho": 0.5665
+      },
+      {
+        "mae": 1.6582,
+        "rmse": 2.1219,
+        "r2": 0.3515,
+        "pearson_r": 0.6482,
+        "spearman_rho": 0.6222
+      },
+      {
+        "mae": 0.9323,
+        "rmse": 1.1892,
+        "r2": 0.268,
+        "pearson_r": 0.6147,
+        "spearman_rho": 0.6702
+      },
+      {
+        "mae": 1.2667,
+        "rmse": 1.5531,
+        "r2": 0.3641,
+        "pearson_r": 0.6206,
+        "spearman_rho": 0.6526
+      },
+      {
+        "mae": 1.0602,
+        "rmse": 1.2909,
+        "r2": 0.639,
+        "pearson_r": 0.8537,
+        "spearman_rho": 0.8298
+      }
+    ]
+  },
+  {
+    "model_name": "SVR (RBF)",
+    "feature_config": "MODEL B (Color + Demographics)",
+    "features_count": 26,
+    "oof_mae": 1.2129,
+    "oof_rmse": 1.5735,
+    "oof_r2": 0.4192,
+    "oof_pearson_r": 0.6493,
+    "oof_spearman_rho": 0.6642,
+    "mean_cv_mae": 1.2129,
+    "std_cv_mae": 0.2514,
+    "mean_cv_rmse": 1.534,
+    "std_cv_rmse": 0.35,
+    "mean_cv_r2": 0.3932,
+    "fold_metrics": [
+      {
+        "mae": 1.1945,
+        "rmse": 1.4929,
+        "r2": 0.3264,
+        "pearson_r": 0.6055,
+        "spearman_rho": 0.5516
+      },
+      {
+        "mae": 1.6163,
+        "rmse": 2.104,
+        "r2": 0.3624,
+        "pearson_r": 0.6544,
+        "spearman_rho": 0.6634
+      },
+      {
+        "mae": 0.866,
+        "rmse": 1.0763,
+        "r2": 0.4003,
+        "pearson_r": 0.6933,
+        "spearman_rho": 0.7088
+      },
+      {
+        "mae": 1.3203,
+        "rmse": 1.6909,
+        "r2": 0.2463,
+        "pearson_r": 0.515,
+        "spearman_rho": 0.5094
+      },
+      {
+        "mae": 1.0676,
+        "rmse": 1.3061,
+        "r2": 0.6305,
+        "pearson_r": 0.8278,
+        "spearman_rho": 0.8158
+      }
+    ]
+  }
+]

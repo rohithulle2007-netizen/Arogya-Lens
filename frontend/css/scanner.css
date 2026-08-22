@@ -1,0 +1,204 @@
+/* ==========================================================================
+   Arogya Lens — Scanner, Viewfinder & Eye Alignment Styles
+   ========================================================================== */
+
+.scanner-view-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 120px);
+  position: relative;
+}
+
+/* Live Camera Feed & Viewfinder Frame with Device-Adaptive Aspect Ratio */
+.camera-preview-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--camera-aspect-ratio, 3 / 4);
+  max-height: min(65vh, 520px);
+  background: #000000;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: aspect-ratio 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#cameraVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#captureCanvas {
+  display: none;
+}
+
+/* Viewfinder Overlay */
+.viewfinder-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Rounded Target Eye Alignment Frame */
+.eye-guide-frame {
+  width: 240px;
+  height: 150px;
+  border: 2px dashed rgba(255, 255, 255, 0.6);
+  border-radius: 90px / 55px; /* Organic oval/eyelid shape */
+  position: relative;
+  transition: all var(--transition-normal);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+}
+
+.eye-guide-frame.aligned {
+  border: 3px solid var(--status-normal);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5), 0 0 20px rgba(31, 138, 112, 0.6);
+  animation: pulseGreen 1.5s infinite;
+}
+
+.eye-guide-frame.warning {
+  border: 3px solid var(--status-warning);
+}
+
+@keyframes pulseGreen {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+/* Pull-down eyelid guidance label */
+.guide-sublabel {
+  position: absolute;
+  bottom: 12px;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  color: #ffffff;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* Real-time Quality / Status Pill */
+.alignment-status-pill {
+  position: absolute;
+  top: 16px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  z-index: 10;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #cbd5e1;
+}
+
+.status-dot.active-green {
+  background: #22c55e;
+  box-shadow: 0 0 8px #22c55e;
+}
+
+.status-dot.active-orange {
+  background: #f97316;
+}
+
+/* Scanner Action Controls */
+.scanner-controls {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.shutter-btn-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.shutter-btn {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 4px solid var(--primary-teal);
+  padding: 4px;
+  cursor: pointer;
+  outline: none;
+  transition: transform var(--transition-fast);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shutter-btn:active {
+  transform: scale(0.92);
+}
+
+.shutter-inner {
+  width: 100%;
+  height: 100%;
+  background: var(--accent-rose);
+  border-radius: 50%;
+  transition: background var(--transition-fast);
+}
+
+.camera-switch-btn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-light);
+  color: var(--text-main);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Quality Checklist on Capture Review Screen */
+.quality-checklist {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin: 16px 0;
+  border: 1px solid var(--border-light);
+}
+
+.quality-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-light);
+  font-size: 0.88rem;
+}
+
+.quality-item:last-child {
+  border-bottom: none;
+}
+
+.quality-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}

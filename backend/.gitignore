@@ -1,0 +1,12 @@
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+arogya_lens.db
+uploads/*
+!uploads/.gitkeep
+.pytest_cache/
+.idea/
+.vscode/
+.DS_Store

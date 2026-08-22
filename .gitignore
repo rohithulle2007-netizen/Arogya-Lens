@@ -1,0 +1,71 @@
+# ==============================================================================
+# Arogya Lens — Production Git Ignore Rules
+# Keeps the repository clean (< 5 MB) and ready for GitHub & GitHub Pages deployment.
+# ==============================================================================
+
+# --- Node & Frontend Build Artifacts ---
+node_modules/
+**/node_modules/
+dist/
+**/dist/
+.vite/
+**/.vite/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Python & Virtual Environments ---
+__pycache__/
+**/__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+ENV/
+*.egg-info/
+.eggs/
+
+# --- Unit Test / Coverage Reports ---
+.pytest_cache/
+**/.pytest_cache/
+.coverage
+htmlcov/
+
+# --- Local Environment Variables & Secrets ---
+.env
+.env.local
+.env.*.local
+
+# --- SQLite Databases & Local Storage ---
+*.db
+*.sqlite
+*.sqlite3
+
+# --- Uploaded Patient Eye Photographs (Preserve directory structure only) ---
+uploads/*
+!uploads/.gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# --- Large Datasets & Archives ---
+**/dataset/raw/
+**/dataset/images/
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# --- Legacy / Unmerged Pre-Integration Directories ---
+arogya_lens_backend_*/
+arogya_lens_frontend_*/
+Arogya-Lens/
+
+# --- Operating System & IDE Files ---
+.DS_Store
+.DS_Store?
+._*
+.idea/
+.vscode/
+*.swp
+*.swo
