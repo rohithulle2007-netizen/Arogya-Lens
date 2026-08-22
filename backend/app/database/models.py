@@ -144,6 +144,10 @@ class Screening(Base):
     confidence: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
     status: Mapped[str] = mapped_column(String(50), nullable=False)
     image_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    left_eye_image_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    right_eye_image_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    left_thumb_image_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
+    right_thumb_image_path: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
     image_quality: Mapped[str] = mapped_column(String(50), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 

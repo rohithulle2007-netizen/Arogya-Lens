@@ -57,69 +57,76 @@
         </div>
 
         <div style="background: var(--bg-card); padding: 18px; border-radius: var(--radius-md); border: 1px solid var(--border-light); margin-bottom: 24px;">
-          <h3 style="font-size: 1rem; margin-bottom: 8px;">How It Works:</h3>
-          <ul style="font-size: 0.88rem; color: var(--text-muted); padding-left: 20px; line-height: 1.6;">
-            <li>Gently expose your lower eyelid's inner conjunctiva.</li>
-            <li>Align with the live camera viewfinder.</li>
-            <li>AI estimates Hemoglobin levels in seconds without needles.</li>
+          <h3 style="font-size: 1rem; margin-bottom: 8px;">4-Point Optical Biomarker Screening:</h3>
+          <ul style="padding-left: 20px; font-size: 0.85rem; color: var(--text-muted); line-height: 1.6;">
+            <li>👁️ <strong>Bilateral Eyes:</strong> Lower palpebral conjunctiva pallor analysis.</li>
+            <li>👍 <strong>Bilateral Thumbs:</strong> Fingertip nail bed capillary erythema analysis.</li>
+            <li>⚡ <strong>AI Biomarker Fusion:</strong> Rapid multi-modal hemoglobin estimation.</li>
           </ul>
         </div>
 
-        <button id="onboardingAgreeBtn" class="btn btn-primary">I Understand & Agree</button>
-      </section>
-
-      <!-- 2. Login Screen -->
-      <section id="loginScreen" class="screen-view">
-        <h2 class="section-title" data-i18n="login">Log In</h2>
-        <p class="section-subtitle">Enter your registered mobile number to receive an OTP</p>
-
-        <form id="loginForm">
-          <div class="form-group">
-            <label class="form-label" data-i18n="phone_number">Mobile Number</label>
-            <input type="tel" id="loginMobile" class="form-input" placeholder="Enter 10-digit mobile" maxlength="10" required>
-          </div>
-          <button type="submit" class="btn btn-primary" style="margin-top: 10px;" data-i18n="send_otp">Send OTP</button>
-        </form>
-
-        <div style="text-align: center; margin-top: 24px;">
-          <span style="font-size: 0.88rem; color: var(--text-muted);">New patient? </span>
-          <button id="goToRegisterBtn" type="button" style="background: none; border: none; color: var(--primary-teal); font-weight: 600; cursor: pointer;" data-i18n="register">Create Account</button>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <button id="getStartedBtn" class="btn btn-primary" data-i18n="register">Register as New Patient</button>
+          <button id="onboardingLoginBtn" class="btn btn-secondary" data-i18n="login">Log In with Mobile OTP</button>
         </div>
       </section>
 
-      <!-- 3. Registration Screen -->
+      <!-- 2. Registration Screen -->
       <section id="registerScreen" class="screen-view">
         <h2 class="section-title" data-i18n="register">Patient Registration</h2>
-        <p class="section-subtitle">Create your personal health profile</p>
+        <p class="section-subtitle">Create your screening profile for accurate AI adjustments</p>
 
         <form id="registerForm">
           <div class="form-group">
             <label class="form-label" data-i18n="name">Full Name</label>
-            <input type="text" id="regName" class="form-input" placeholder="e.g. Priya Sharma" required>
+            <input type="text" id="regName" class="form-input" data-i18n="name_placeholder" placeholder="e.g. Priya Sharma" required>
           </div>
+
           <div class="form-group">
             <label class="form-label" data-i18n="phone_number">Mobile Number</label>
-            <input type="tel" id="regMobile" class="form-input" placeholder="10-digit mobile" maxlength="10" required>
+            <input type="tel" id="regMobile" class="form-input" data-i18n="phone_placeholder" placeholder="10-digit mobile" maxlength="10" required>
           </div>
+
           <div style="display: flex; gap: 12px;">
             <div class="form-group" style="flex: 1;">
-              <label class="form-label" data-i18n="age">Age</label>
-              <input type="number" id="regAge" class="form-input" min="1" max="120" placeholder="Years" required>
+              <label class="form-label" data-i18n="age">Age (Years)</label>
+              <input type="number" id="regAge" class="form-input" placeholder="Age" min="1" max="120" required>
             </div>
+
             <div class="form-group" style="flex: 1;">
               <label class="form-label" data-i18n="sex">Sex</label>
-              <select id="regSex" class="form-select">
-                <option value="female">Female</option>
-                <option value="male">Male</option>
-                <option value="other">Other</option>
+              <select id="regSex" class="form-select" required>
+                <option value="female" data-i18n="female">Female</option>
+                <option value="male" data-i18n="male">Male</option>
+                <option value="other" data-i18n="other">Other</option>
               </select>
             </div>
           </div>
-          <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Create Account & Send OTP</button>
+
+          <button type="submit" class="btn btn-primary" style="margin-top: 12px;" data-i18n="send_otp">Send OTP & Register</button>
         </form>
 
         <div style="text-align: center; margin-top: 20px;">
-          <button id="goToLoginBtn" type="button" style="background: none; border: none; color: var(--primary-teal); font-weight: 600; cursor: pointer;">Already have an account? Log In</button>
+          <button id="goToRegisterLoginBtn" type="button" style="background: none; border: none; color: var(--primary-teal); font-weight: 600; cursor: pointer;">Already registered? Log In</button>
+        </div>
+      </section>
+
+      <!-- 3. Login Screen -->
+      <section id="loginScreen" class="screen-view">
+        <h2 class="section-title" data-i18n="login">Patient Login</h2>
+        <p class="section-subtitle">Enter registered mobile number for OTP verification</p>
+
+        <form id="loginForm">
+          <div class="form-group">
+            <label class="form-label" data-i18n="phone_number">Mobile Number</label>
+            <input type="tel" id="loginMobile" class="form-input" data-i18n="phone_placeholder" placeholder="10-digit mobile" maxlength="10" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="margin-top: 12px;" data-i18n="send_otp">Send OTP</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px;">
+          <button id="goToLoginBtn" type="button" style="background: none; border: none; color: var(--primary-teal); font-weight: 600; cursor: pointer;">Need an account? Register</button>
         </div>
       </section>
 
@@ -154,12 +161,12 @@
         </div>
 
         <div class="result-hero-card" style="text-align: left; padding: 20px;">
-          <span class="badge badge-normal" style="margin-bottom: 8px;">Non-Invasive Screening</span>
-          <h3 style="font-size: 1.2rem; margin-bottom: 6px;">Ready for your Eye Scan?</h3>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Fast, needle-free hemoglobin estimation through optical conjunctiva analysis.</p>
+          <span class="badge badge-normal" style="margin-bottom: 8px;">Bilateral Multi-Site Screening</span>
+          <h3 style="font-size: 1.2rem; margin-bottom: 6px;">Ready for your 4-Point Health Scan?</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px;">Comprehensive hemoglobin estimation analyzing both eyes and both thumb nail beds.</p>
           <button id="startScanBtn" class="btn btn-primary">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            <span data-i18n="start_screening">Start Eye Scan</span>
+            <span data-i18n="start_screening">Start 4-Point Screening</span>
           </button>
         </div>
 
@@ -169,9 +176,24 @@
         </div>
       </section>
 
-      <!-- 6. Scanner & Live Viewfinder Screen -->
+      <!-- 6. Multi-Step Scanner & Live Viewfinder Screen -->
       <section id="scannerScreen" class="screen-view">
         <div class="scanner-view-wrapper">
+          
+          <!-- Step Progress Tracker -->
+          <div class="scanner-step-tracker">
+            <div id="scannerStepLabel" class="scanner-step-label">
+              <span id="scannerStepIcon">👁️</span>
+              <span id="scannerStepText">Step 1 of 4: Left Eye</span>
+            </div>
+            <div class="scanner-step-dots">
+              <div id="stepDot1" class="step-dot active"></div>
+              <div id="stepDot2" class="step-dot"></div>
+              <div id="stepDot3" class="step-dot"></div>
+              <div id="stepDot4" class="step-dot"></div>
+            </div>
+          </div>
+
           <div class="camera-preview-container">
             <video id="cameraVideo" playsinline autoplay muted></video>
             <canvas id="captureCanvas"></canvas>
@@ -179,18 +201,25 @@
             <div class="viewfinder-overlay">
               <div class="alignment-status-pill">
                 <div id="alignmentStatusDot" class="status-dot active-orange"></div>
-                <span id="alignmentStatusText" data-i18n="position_eye">Position eye in frame</span>
+                <span id="alignmentStatusText">Position in frame</span>
               </div>
 
+              <!-- Eye Guide Frame (Visible during Step 1 & 2) -->
               <div id="eyeGuideFrame" class="eye-guide-frame">
-                <div class="guide-sublabel">Pull down lower eyelid</div>
+                <div id="eyeGuideSublabel" class="guide-sublabel">Pull down lower eyelid</div>
+              </div>
+
+              <!-- Thumb Guide Frame (Visible during Step 3 & 4) -->
+              <div id="thumbGuideFrame" class="thumb-guide-frame" style="display: none;">
+                <div class="thumb-nail-target"></div>
+                <div id="thumbGuideSublabel" class="guide-sublabel">Align thumb nail bed</div>
               </div>
             </div>
           </div>
 
           <div class="scanner-controls">
-            <p style="font-size: 0.8rem; text-align: center; color: var(--text-muted);" data-i18n="align_instruction">
-              Gently pull down your lower eyelid to reveal the inner pink conjunctiva. Align inside the guide.
+            <p id="scannerInstructionText" style="font-size: 0.82rem; text-align: center; color: var(--text-muted); line-height: 1.4;">
+              Gently pull down lower eyelid of your LEFT eye to expose the pink conjunctiva. Align inside the guide.
             </p>
 
             <div class="shutter-btn-container">
@@ -198,7 +227,7 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0-4.4-3.6-8-8-8s-8 3.6-8 8h3l-4 4-4-4h3c0-5.5 4.5-10 10-10s10 4.5 10 10h-2z"/></svg>
               </button>
 
-              <button id="shutterBtn" class="shutter-btn" type="button">
+              <button id="shutterBtn" class="shutter-btn" type="button" title="Capture Scan">
                 <div class="shutter-inner"></div>
               </button>
 
@@ -208,34 +237,79 @@
         </div>
       </section>
 
-      <!-- 7. Capture Review Screen -->
+      <!-- 7. 4-Card Capture Review Screen -->
       <section id="captureReviewScreen" class="screen-view">
-        <h2 class="section-title">Review Scan</h2>
-        <p class="section-subtitle">Confirm image quality before AI analysis</p>
+        <h2 class="section-title" data-i18n="review_title">Review 4-Point Scans</h2>
+        <p class="section-subtitle" data-i18n="review_subtext">Inspect all 4 scans before running AI biomarker analysis</p>
 
-        <div style="border-radius: var(--radius-md); overflow: hidden; max-height: 260px; background: #000; text-align: center;">
-          <img id="capturedImagePreview" style="width: 100%; height: 260px; object-fit: cover;" alt="Captured Eye Scan">
+        <!-- 4-Card Preview Grid -->
+        <div class="review-grid-4">
+          <!-- Card 1: Left Eye -->
+          <div id="cardLeftEye" class="review-card">
+            <div class="review-card-header">
+              <span class="review-card-title">👁️ Left Eye</span>
+              <span id="badgeLeftEye" class="badge badge-normal" style="font-size:0.7rem;">Captured</span>
+            </div>
+            <div class="review-card-thumb-container">
+              <img id="thumbLeftEye" class="review-card-img" alt="Left Eye Scan">
+            </div>
+            <button id="retakeLeftEyeBtn" type="button" class="review-retake-btn">Retake</button>
+          </div>
+
+          <!-- Card 2: Right Eye -->
+          <div id="cardRightEye" class="review-card">
+            <div class="review-card-header">
+              <span class="review-card-title">👁️ Right Eye</span>
+              <span id="badgeRightEye" class="badge badge-normal" style="font-size:0.7rem;">Captured</span>
+            </div>
+            <div class="review-card-thumb-container">
+              <img id="thumbRightEye" class="review-card-img" alt="Right Eye Scan">
+            </div>
+            <button id="retakeRightEyeBtn" type="button" class="review-retake-btn">Retake</button>
+          </div>
+
+          <!-- Card 3: Left Thumb -->
+          <div id="cardLeftThumb" class="review-card">
+            <div class="review-card-header">
+              <span class="review-card-title">👍 Left Thumb</span>
+              <span id="badgeLeftThumb" class="badge badge-normal" style="font-size:0.7rem;">Captured</span>
+            </div>
+            <div class="review-card-thumb-container">
+              <img id="thumbLeftThumb" class="review-card-img" alt="Left Thumb Scan">
+            </div>
+            <button id="retakeLeftThumbBtn" type="button" class="review-retake-btn">Retake</button>
+          </div>
+
+          <!-- Card 4: Right Thumb -->
+          <div id="cardRightThumb" class="review-card">
+            <div class="review-card-header">
+              <span class="review-card-title">👍 Right Thumb</span>
+              <span id="badgeRightThumb" class="badge badge-normal" style="font-size:0.7rem;">Captured</span>
+            </div>
+            <div class="review-card-thumb-container">
+              <img id="thumbRightThumb" class="review-card-img" alt="Right Thumb Scan">
+            </div>
+            <button id="retakeRightThumbBtn" type="button" class="review-retake-btn">Retake</button>
+          </div>
         </div>
 
-        <div id="qualityChecklistItems" class="quality-checklist"></div>
-
         <div style="display: flex; gap: 12px; margin-top: 18px;">
-          <button id="retakeBtn" class="btn btn-secondary" style="flex: 1;" data-i18n="retake">Retake</button>
-          <button id="confirmAnalyzeBtn" class="btn btn-primary" style="flex: 2;">Analyze Image</button>
+          <button id="retakeAllBtn" class="btn btn-secondary" style="flex: 1;">Retake All</button>
+          <button id="confirmAnalyzeBtn" class="btn btn-primary" style="flex: 2;" data-i18n="analyze_all_btn">Analyze All 4 Scans</button>
         </div>
       </section>
 
       <!-- 8. Analyzing Screen -->
       <section id="analyzingScreen" class="screen-view" style="text-align: center; padding: 60px 20px;">
         <div style="width: 70px; height: 70px; border: 5px solid var(--border-light); border-top-color: var(--primary-teal); border-radius: 50%; margin: 0 auto 24px; animation: spin 1s linear infinite;"></div>
-        <h2 class="section-title" data-i18n="analyzing_title">Analyzing Eye Image...</h2>
-        <p class="section-subtitle" data-i18n="analyzing_subtext">Extracting optical conjunctiva features & estimating Hemoglobin</p>
+        <h2 class="section-title" data-i18n="analyzing_title">Analyzing 4-Point Scans...</h2>
+        <p class="section-subtitle" data-i18n="analyzing_subtext">Extracting optical biomarkers from bilateral conjunctiva & nail beds</p>
       </section>
 
-      <!-- 9. Results & Symptoms Screen -->
+      <!-- 9. Results Screen (No Symptoms Page) -->
       <section id="resultScreen" class="screen-view">
         <h2 class="section-title" data-i18n="results_title">Screening Assessment</h2>
-        <p class="section-subtitle">Estimated Hemoglobin & Clinical Guidance</p>
+        <p class="section-subtitle">Estimated Hemoglobin & Multi-Site Biomarker Guidance</p>
 
         <div class="result-hero-card">
           <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;" data-i18n="estimated_hb">Estimated Hb</span>
@@ -251,10 +325,10 @@
           <div class="confidence-container">
             <div class="confidence-header">
               <span data-i18n="confidence">Optical Confidence</span>
-              <strong id="resultConfidenceValue">85%</strong>
+              <strong id="resultConfidenceValue">92%</strong>
             </div>
             <div class="confidence-bar-track">
-              <div id="resultConfidenceBar" class="confidence-bar-fill" style="width: 85%;"></div>
+              <div id="resultConfidenceBar" class="confidence-bar-fill" style="width: 92%;"></div>
             </div>
           </div>
 
@@ -266,23 +340,30 @@
           <div data-i18n="disclaimer_notice">Screening estimate — not a laboratory diagnosis (CBC). Consult a healthcare professional.</div>
         </div>
 
-        <!-- Optional Symptoms Selector -->
-        <h3 style="font-size: 1.05rem; margin-top: 20px;" data-i18n="symptoms_title">Reported Symptoms</h3>
-        <p style="font-size: 0.8rem; color: var(--text-muted);" data-i18n="symptoms_sub">Select any symptoms you are currently experiencing</p>
-
-        <div class="symptoms-grid">
-          <div class="symptom-chip" data-symptom="fatigue" data-i18n="sym_fatigue">Fatigue & Weakness</div>
-          <div class="symptom-chip" data-symptom="dizziness" data-i18n="sym_dizziness">Dizziness</div>
-          <div class="symptom-chip" data-symptom="pale_skin" data-i18n="sym_pale_skin">Pale Skin</div>
-          <div class="symptom-chip" data-symptom="cold_hands_feet" data-i18n="sym_cold_hands">Cold Hands / Feet</div>
-          <div class="symptom-chip" data-symptom="shortness_of_breath" data-i18n="sym_shortness_breath">Shortness of Breath</div>
-          <div class="symptom-chip" data-symptom="headache" data-i18n="sym_headache">Headache</div>
-          <div class="symptom-chip" data-symptom="none" data-i18n="sym_none" style="grid-column: span 2;">No Symptoms</div>
+        <!-- 4-Site Verified Stat Breakdown -->
+        <h3 style="font-size: 1.05rem; margin-top: 20px;">4-Point Biomarker Summary</h3>
+        <div class="multisite-result-grid">
+          <div class="site-stat-card">
+            <span class="site-stat-label">👁️ Left Eye</span>
+            <span id="statLeftEye" class="site-stat-badge">Conjunctiva Verified</span>
+          </div>
+          <div class="site-stat-card">
+            <span class="site-stat-label">👁️ Right Eye</span>
+            <span id="statRightEye" class="site-stat-badge">Conjunctiva Verified</span>
+          </div>
+          <div class="site-stat-card">
+            <span class="site-stat-label">👍 Left Thumb</span>
+            <span id="statLeftThumb" class="site-stat-badge">Nail Bed Verified</span>
+          </div>
+          <div class="site-stat-card">
+            <span class="site-stat-label">👍 Right Thumb</span>
+            <span id="statRightThumb" class="site-stat-badge">Nail Bed Verified</span>
+          </div>
         </div>
 
         <div style="display: flex; gap: 12px; margin-top: 20px;">
-          <button id="resultRetakeBtn" class="btn btn-secondary" style="flex: 1;" data-i18n="retake">Retake</button>
-          <button id="saveSymptomsBtn" class="btn btn-primary" style="flex: 2;" data-i18n="save_continue">Save & View Dashboard</button>
+          <button id="resultRetakeBtn" class="btn btn-secondary" style="flex: 1;" data-i18n="retake">New Scan</button>
+          <button id="viewDashboardBtn" class="btn btn-primary" style="flex: 2;" data-i18n="view_dashboard_btn">Continue to Dashboard</button>
         </div>
       </section>
 
@@ -335,7 +416,7 @@
       <!-- 11. History Screen -->
       <section id="historyScreen" class="screen-view">
         <h2 class="section-title" data-i18n="history_tab">Screening History</h2>
-        <p class="section-subtitle">Chronological record of eye checkups</p>
+        <p class="section-subtitle">Chronological record of 4-point health checkups</p>
 
         <div style="display: flex; gap: 8px; margin-bottom: 16px;">
           <button class="btn btn-secondary history-filter-btn active" data-filter="all" style="padding: 6px 14px; font-size: 0.8rem; width: auto;">All</button>
@@ -421,12 +502,17 @@
         </div>
       </div>
       <div style="margin-bottom:14px;">
-        <span style="font-size:0.8rem; color:var(--text-muted);">Confidence Score</span>
+        <span style="font-size:0.8rem; color:var(--text-muted);">Optical Reliability</span>
         <div id="modalConfidence" style="font-weight:600;">--</div>
       </div>
       <div style="margin-bottom:20px;">
-        <span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">Reported Symptoms</span>
-        <div id="modalSymptomsList" style="display:flex; flex-wrap:wrap; gap:4px;"></div>
+        <span style="font-size:0.8rem; color:var(--text-muted); display:block; margin-bottom:6px;">Biomarker Sites Analyzed</span>
+        <div style="display:flex; flex-wrap:wrap; gap:6px;">
+          <span class="badge badge-normal">👁️ Left Eye</span>
+          <span class="badge badge-normal">👁️ Right Eye</span>
+          <span class="badge badge-normal">👍 Left Thumb</span>
+          <span class="badge badge-normal">👍 Right Thumb</span>
+        </div>
       </div>
       <button id="closeDetailModalBtn" class="btn btn-primary">Close</button>
     </div>

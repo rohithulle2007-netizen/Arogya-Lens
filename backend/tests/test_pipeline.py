@@ -60,17 +60,45 @@ def test_reliability_scoring():
     assert rel_high > rel_low
 
 
-def test_pipeline_on_dataset_sample():
-    """Test complete pipeline on actual dataset image if present."""
-    pipeline = ArogyaLensPipeline()
-    sample_path = "1/20200118_164733_forniceal_palpebral.png"
-    if os.path.exists(sample_path):
-        with open(sample_path, "rb") as f:
-            img_bytes = f.read()
+def test_nail_bed_roi_extraction():
+    """Test nail bed extraction on synthetic thumb image."""
+    from app.ai.nail_bed import extract_nail_bed_roi, extract_nail_bed_features
+    thumb_img = np.ones((300, 300, 3), dtype=np.uint8) * 160
+    # Pink vascular nail bed area in center
+    thumb_img[60:220, 80:200, 2] = 210  # High R
+    thumb_img[60:220, 80:200, 1] = 130  # Moderate G
+    thumb_img[60:220, 80:200, 0] = 130  # Moderate B
 
-        result: ScreeningResult = pipeline.analyze_image_bytes(img_bytes, age=29, sex="M")
-        assert result.success is True
-        assert result.estimated_hb is not None
-        assert 5.0 <= result.estimated_hb <= 20.0
-        assert 0.0 <= result.prediction_reliability <= 1.0
-        assert result.status in ["normal", "mild_anemia", "moderate_anemia", "severe_anemia"]
+    roi_res = extract_nail_bed_roi(thumb_img)
+    assert roi_res.is_valid is True
+    assert roi_res.roi_pixel_count > 0
+
+    features = extract_nail_bed_features(roi_res.roi_pixels)
+    assert "erythema_index" in features
+    assert "ratio_redness" in features
+
+
+def test_multisite_pipeline_analysis():
+    """Test 4-point multi-site screening analysis."""
+    pipeline = ArogyaLensPipeline()
+    eye_img = np.ones((250, 250, 3), dtype=np.uint8) * 150
+    eye_img[80:180, 50:200, 2] = 200  # Pink conjunctiva
+    eye_img[80:180, 50:200, 1] = 120
+
+    thumb_img = np.ones((250, 250, 3), dtype=np.uint8) * 140
+    thumb_img[60:200, 80:180, 2] = 210  # Nail bed
+
+    res: ScreeningResult = pipeline.analyze_multisite(
+        left_eye=eye_img,
+        right_eye=eye_img,
+        left_thumb=thumb_img,
+        right_thumb=thumb_img,
+        age=25,
+        sex="F",
+    )
+    assert res.success is True
+    assert res.estimated_hb is not None
+    assert 5.0 <= res.estimated_hb <= 20.0
+    assert res.prediction_reliability >= 0.60
+    assert "sites" in res.metrics
+

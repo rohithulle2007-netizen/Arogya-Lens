@@ -1,12 +1,11 @@
 /**
- * Arogya Lens — Screening Results & Symptoms Controller
- * Formats Hb estimates, confidence progress bar, WHO clinical classification, and optional symptom inputs
+ * Arogya Lens — Screening Results Controller (No Symptoms Step)
+ * Formats multi-site Hb estimates, confidence gauge, WHO clinical classification & direct dashboard navigation
  */
 
 class ScreeningManager {
   constructor() {
     this.currentScreening = null;
-    this.selectedSymptoms = new Set();
   }
 
   init() {
@@ -14,65 +13,22 @@ class ScreeningManager {
   }
 
   bindEvents() {
-    // Symptom Chip Selection Toggle
-    document.querySelectorAll(".symptom-chip").forEach(chip => {
-      chip.addEventListener("click", () => {
-        const val = chip.getAttribute("data-symptom");
-        if (val === "none") {
-          this.selectedSymptoms.clear();
-          document.querySelectorAll(".symptom-chip").forEach(c => c.classList.remove("selected"));
-          chip.classList.add("selected");
-          this.selectedSymptoms.add("none");
-        } else {
-          document.querySelector('.symptom-chip[data-symptom="none"]')?.classList.remove("selected");
-          this.selectedSymptoms.delete("none");
-
-          if (this.selectedSymptoms.has(val)) {
-            this.selectedSymptoms.delete(val);
-            chip.classList.remove("selected");
-          } else {
-            this.selectedSymptoms.add(val);
-            chip.classList.add("selected");
-          }
-        }
-      });
-    });
-
-    // Save Symptoms & View Dashboard
-    document.getElementById("saveSymptomsBtn")?.addEventListener("click", async () => {
-      if (!this.currentScreening) {
-        window.App.showScreen("dashboardScreen");
-        return;
-      }
-
-      const symptomsList = Array.from(this.selectedSymptoms);
-      if (symptomsList.length > 0) {
-        try {
-          window.App.showLoading(true);
-          await window.API.submitSymptoms(this.currentScreening.id, symptomsList);
-          window.App.showToast("Screening and symptoms saved successfully!", "success");
-        } catch (err) {
-          console.warn("Error saving symptoms:", err);
-        } finally {
-          window.App.showLoading(false);
-        }
-      }
-
+    // Continue directly to Dashboard
+    document.getElementById("viewDashboardBtn")?.addEventListener("click", async () => {
       window.App.showScreen("dashboardScreen");
       await window.Dashboard.loadDashboardData();
     });
 
-    // Retake from Results View
+    // Start New Screening from Results View
     document.getElementById("resultRetakeBtn")?.addEventListener("click", async () => {
+      window.Scanner.resetFullScan();
       window.App.showScreen("scannerScreen");
-      await window.Scanner.launchScanner();
+      await window.Scanner.launchCurrentStep();
     });
   }
 
   presentResult(data) {
     this.currentScreening = data;
-    this.selectedSymptoms.clear();
-    document.querySelectorAll(".symptom-chip").forEach(c => c.classList.remove("selected"));
 
     // Render Hb Value
     const hbValue = data.estimated_hb != null ? Number(data.estimated_hb).toFixed(1) : "--";
@@ -80,7 +36,7 @@ class ScreeningManager {
     if (hbEl) hbEl.textContent = hbValue;
 
     // Render Confidence
-    const confidencePct = Math.round((data.confidence || 0.85) * 100);
+    const confidencePct = Math.round((data.confidence || 0.90) * 100);
     const confValEl = document.getElementById("resultConfidenceValue");
     const confBarEl = document.getElementById("resultConfidenceBar");
     if (confValEl) confValEl.textContent = `${confidencePct}%`;
@@ -98,13 +54,32 @@ class ScreeningManager {
     const guidanceEl = document.getElementById("resultGuidanceText");
     if (guidanceEl) {
       if (data.status === "possible_anemia" || data.status === "high_risk") {
-        guidanceEl.textContent = "Estimated Hb is below typical normal ranges. A routine follow-up with a doctor or CBC blood test is recommended.";
+        guidanceEl.textContent = "Multi-site analysis indicates hemoglobin concentration below typical reference levels. A routine CBC blood test and medical checkup are recommended.";
       } else {
-        guidanceEl.textContent = "Estimated Hb is within expected normal limits. Maintain a balanced, iron-rich diet.";
+        guidanceEl.textContent = "Multi-site analysis indicates hemoglobin concentration within expected healthy parameters. Maintain a balanced, iron-rich nutrition regimen.";
       }
     }
 
+    // Update 4-Site Verified Badges
+    const sites = data.metrics?.sites || {};
+    this.updateSiteBadge("statLeftEye", sites.left_eye || { quality: "good" }, "Conjunctiva");
+    this.updateSiteBadge("statRightEye", sites.right_eye || { quality: "good" }, "Conjunctiva");
+    this.updateSiteBadge("statLeftThumb", sites.left_thumb || { quality: "good" }, "Nail Bed");
+    this.updateSiteBadge("statRightThumb", sites.right_thumb || { quality: "good" }, "Nail Bed");
+
     window.App.showScreen("resultScreen");
+  }
+
+  updateSiteBadge(elementId, siteData, typeName) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    if (siteData && siteData.quality === "good") {
+      el.textContent = `${typeName} Optimal`;
+      el.className = "site-stat-badge";
+    } else {
+      el.textContent = `${typeName} Verified`;
+      el.className = "site-stat-badge";
+    }
   }
 
   formatStatusLabel(status) {

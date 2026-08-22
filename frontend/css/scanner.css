@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Arogya Lens — Scanner, Viewfinder & Eye Alignment Styles
+   Arogya Lens — Multi-Site Scanner (Bilateral Eyes + Bilateral Thumbs)
    ========================================================================== */
 
 .scanner-view-wrapper {
@@ -9,7 +9,52 @@
   position: relative;
 }
 
-/* Live Camera Feed & Viewfinder Frame with Device-Adaptive Aspect Ratio */
+/* Step Progress Indicator Bar */
+.scanner-step-tracker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-full);
+  padding: 8px 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow-sm);
+}
+
+.scanner-step-label {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--primary-teal-dark);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.scanner-step-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.step-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--border-light);
+  transition: all var(--transition-fast);
+}
+
+.step-dot.active {
+  background: var(--primary-teal);
+  transform: scale(1.2);
+  box-shadow: 0 0 6px rgba(31, 138, 112, 0.5);
+}
+
+.step-dot.completed {
+  background: var(--status-normal);
+}
+
+/* Live Camera Feed & Viewfinder Frame */
 .camera-preview-container {
   position: relative;
   width: 100%;
@@ -51,20 +96,49 @@
   width: 240px;
   height: 150px;
   border: 2px dashed rgba(255, 255, 255, 0.6);
-  border-radius: 90px / 55px; /* Organic oval/eyelid shape */
+  border-radius: 90px / 55px; /* Organic eyelid shape */
   position: relative;
   transition: all var(--transition-normal);
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
 }
 
 .eye-guide-frame.aligned {
   border: 3px solid var(--status-normal);
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5), 0 0 20px rgba(31, 138, 112, 0.6);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55), 0 0 20px rgba(31, 138, 112, 0.6);
   animation: pulseGreen 1.5s infinite;
 }
 
 .eye-guide-frame.warning {
   border: 3px solid var(--status-warning);
+}
+
+/* Vertical Thumb Nail Bed Alignment Frame */
+.thumb-guide-frame {
+  width: 160px;
+  height: 220px;
+  border: 2px dashed rgba(255, 255, 255, 0.6);
+  border-radius: 80px 80px 40px 40px; /* Thumb / fingertip contour */
+  position: relative;
+  transition: all var(--transition-normal);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.thumb-guide-frame.aligned {
+  border: 3px solid var(--status-normal);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55), 0 0 20px rgba(31, 138, 112, 0.6);
+  animation: pulseGreen 1.5s infinite;
+}
+
+.thumb-nail-target {
+  width: 90px;
+  height: 110px;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  border-radius: 45px 45px 30px 30px;
+  position: absolute;
+  top: 25px;
 }
 
 @keyframes pulseGreen {
@@ -73,24 +147,26 @@
   100% { transform: scale(1); }
 }
 
-/* Pull-down eyelid guidance label */
+/* Guidance Label */
 .guide-sublabel {
   position: absolute;
   bottom: 12px;
-  background: rgba(0, 0, 0, 0.65);
-  backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
   color: #ffffff;
-  padding: 4px 12px;
+  padding: 5px 14px;
   border-radius: var(--radius-full);
   font-size: 0.75rem;
-  font-weight: 500;
+  font-weight: 600;
+  text-align: center;
+  max-width: 90%;
 }
 
 /* Real-time Quality / Status Pill */
 .alignment-status-pill {
   position: absolute;
   top: 16px;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
   color: #ffffff;
   padding: 6px 14px;
@@ -121,7 +197,7 @@
 
 /* Scanner Action Controls */
 .scanner-controls {
-  margin-top: 20px;
+  margin-top: 18px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -174,31 +250,117 @@
   justify-content: center;
 }
 
-/* Quality Checklist on Capture Review Screen */
-.quality-checklist {
-  background: var(--bg-card);
-  border-radius: var(--radius-md);
-  padding: 16px;
+/* 4-Card Capture Review Grid */
+.review-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
   margin: 16px 0;
-  border: 1px solid var(--border-light);
 }
 
-.quality-item {
+.review-card {
+  background: var(--bg-card);
+  border: 1.5px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-fast);
+}
+
+.review-card.captured {
+  border-color: var(--primary-teal-light);
+}
+
+.review-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border-light);
-  font-size: 0.88rem;
 }
 
-.quality-item:last-child {
-  border-bottom: none;
+.review-card-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-main);
 }
 
-.quality-badge {
+.review-card-thumb-container {
+  width: 100%;
+  height: 110px;
+  background: #0f172a;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.review-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.review-card-placeholder {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.review-retake-btn {
+  background: var(--bg-main);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary-teal);
+  cursor: pointer;
+  width: 100%;
+  text-align: center;
+  transition: background var(--transition-fast);
+}
+
+.review-retake-btn:hover {
+  background: var(--primary-teal-surface);
+}
+
+/* 4-Site Result Cards Breakdown */
+.multisite-result-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.site-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.site-stat-label {
   font-size: 0.78rem;
   font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.site-stat-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary-teal);
+  background: var(--primary-teal-surface);
   padding: 2px 8px;
   border-radius: var(--radius-full);
+  align-self: flex-start;
 }

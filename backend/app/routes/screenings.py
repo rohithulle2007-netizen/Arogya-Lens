@@ -1,3 +1,4 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, UploadFile, File, status
 from sqlalchemy.orm import Session
 from app.database.connection import get_db
@@ -12,7 +13,7 @@ from app.schemas.symptom import (
     ScreeningSymptomsListResponse,
 )
 from app.services.screening_service import (
-    analyze_eye_image,
+    analyze_screening_images,
     get_screening_by_id,
     add_screening_symptoms,
     get_screening_symptoms,
@@ -25,19 +26,31 @@ router = APIRouter(prefix="/api/screenings", tags=["Screenings"])
     "/analyze",
     response_model=ScreeningResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Upload ocular image and receive non-invasive Hb assessment",
+    summary="Upload multi-site screening photos (Left/Right Eye + Left/Right Thumb) for Hb assessment",
 )
 async def analyze_screening_endpoint(
-    image: UploadFile = File(..., description="Captured conjunctiva/eye image file"),
+    left_eye: Optional[UploadFile] = File(None, description="Captured Left Eye conjunctiva image"),
+    right_eye: Optional[UploadFile] = File(None, description="Captured Right Eye conjunctiva image"),
+    left_thumb: Optional[UploadFile] = File(None, description="Captured Left Thumb nail bed image"),
+    right_thumb: Optional[UploadFile] = File(None, description="Captured Right Thumb nail bed image"),
+    image: Optional[UploadFile] = File(None, description="Single scan fallback image"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     """
-    Receives captured eye photo via multipart/form-data.
-    Validates MIME type/size, saves image, runs Hb prediction, and persists screening.
-    Authenticated via JWT (user identity derived from token).
+    Receives captured scan images via multipart/form-data for bilateral eyes and bilateral thumbs.
+    Validates MIME type/size, extracts multi-site optical biomarkers, runs ensemble Hb prediction,
+    and persists the complete screening record in SQLite.
     """
-    return await analyze_eye_image(db, current_user, image)
+    return await analyze_screening_images(
+        db=db,
+        user=current_user,
+        left_eye=left_eye,
+        right_eye=right_eye,
+        left_thumb=left_thumb,
+        right_thumb=right_thumb,
+        single_image=image,
+    )
 
 
 @router.get(
@@ -52,7 +65,7 @@ def get_screening_detail_endpoint(
     db: Session = Depends(get_db),
 ):
     """
-    Retrieves complete screening details and associated symptoms for the owner.
+    Retrieves complete screening details for the owner.
     """
     return get_screening_by_id(db, current_user, screening_id)
 
@@ -69,10 +82,6 @@ def add_symptoms_endpoint(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Associates user-reported symptoms with a specific screening record.
-    Symptoms are user-reported informational signals and not diagnostic prescriptions.
-    """
     return add_screening_symptoms(db, current_user, screening_id, payload)
 
 
@@ -87,7 +96,4 @@ def get_symptoms_endpoint(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """
-    Returns localized symptoms (English + Hindi) for a screening record.
-    """
     return get_screening_symptoms(db, current_user, screening_id)

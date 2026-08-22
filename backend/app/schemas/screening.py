@@ -1,5 +1,5 @@
 from datetime import datetime, date, time
-from typing import Optional, List
+from typing import Optional, List, Dict, Any
 from pydantic import BaseModel, ConfigDict
 from app.schemas.symptom import BilingualSymptomItem
 
@@ -15,8 +15,13 @@ class ScreeningResponse(BaseModel):
     confidence: Optional[float] = None
     status: str
     image_path: Optional[str] = None
+    left_eye_image_path: Optional[str] = None
+    right_eye_image_path: Optional[str] = None
+    left_thumb_image_path: Optional[str] = None
+    right_thumb_image_path: Optional[str] = None
     image_quality: str
     created_at: datetime
+    metrics: Optional[Dict[str, Any]] = None
 
 
 class ScreeningDetailResponse(BaseModel):
@@ -30,9 +35,14 @@ class ScreeningDetailResponse(BaseModel):
     confidence: Optional[float] = None
     status: str
     image_path: Optional[str] = None
+    left_eye_image_path: Optional[str] = None
+    right_eye_image_path: Optional[str] = None
+    left_thumb_image_path: Optional[str] = None
+    right_thumb_image_path: Optional[str] = None
     image_quality: str
     created_at: datetime
     symptoms: List[BilingualSymptomItem] = []
+    metrics: Optional[Dict[str, Any]] = None
 
 
 class HistoryItemResponse(BaseModel):
@@ -44,6 +54,11 @@ class HistoryItemResponse(BaseModel):
     estimated_hb: Optional[float] = None
     confidence: Optional[float] = None
     status: str
+    image_path: Optional[str] = None
+    left_eye_image_path: Optional[str] = None
+    right_eye_image_path: Optional[str] = None
+    left_thumb_image_path: Optional[str] = None
+    right_thumb_image_path: Optional[str] = None
     image_quality: str
     created_at: Optional[datetime] = None
     symptoms: List[BilingualSymptomItem] = []

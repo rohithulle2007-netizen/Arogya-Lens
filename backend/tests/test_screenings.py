@@ -132,3 +132,27 @@ def test_none_combined_with_other_symptoms_fails(client):
         json=bad_payload,
     )
     assert res.status_code in [400, 422]
+
+
+def test_multisite_screening_upload(client):
+    headers = get_authenticated_client(client, mobile="9777777777", name="MultiSite User")
+
+    # Create 4 image payloads
+    dummy_jpeg = b"\xFF\xD8\xFF\xE0\x00\x10JFIF\x00\x01\x01\x01\x00`\x00`\x00\x00"
+    files = {
+        "left_eye": ("left_eye.jpg", io.BytesIO(dummy_jpeg), "image/jpeg"),
+        "right_eye": ("right_eye.jpg", io.BytesIO(dummy_jpeg), "image/jpeg"),
+        "left_thumb": ("left_thumb.jpg", io.BytesIO(dummy_jpeg), "image/jpeg"),
+        "right_thumb": ("right_thumb.jpg", io.BytesIO(dummy_jpeg), "image/jpeg"),
+    }
+
+    response = client.post("/api/screenings/analyze", headers=headers, files=files)
+    assert response.status_code == 201
+    data = response.json()
+    assert data["estimated_hb"] is not None
+    assert data["confidence"] is not None
+    assert data["left_eye_image_path"] is not None
+    assert data["right_eye_image_path"] is not None
+    assert data["left_thumb_image_path"] is not None
+    assert data["right_thumb_image_path"] is not None
+

@@ -121,13 +121,22 @@ class ApiClient {
   }
 
   // --- Screening APIs ---
-  analyzeImage(imageBlob) {
+  analyzeMultiSite(scans = {}) {
     const formData = new FormData();
-    formData.append("image", imageBlob, "eye_capture.jpg");
+    if (scans.left_eye) formData.append("left_eye", scans.left_eye, "left_eye.jpg");
+    if (scans.right_eye) formData.append("right_eye", scans.right_eye, "right_eye.jpg");
+    if (scans.left_thumb) formData.append("left_thumb", scans.left_thumb, "left_thumb.jpg");
+    if (scans.right_thumb) formData.append("right_thumb", scans.right_thumb, "right_thumb.jpg");
+    if (scans.image) formData.append("image", scans.image, "scan.jpg");
+
     return this.request("/api/screenings/analyze", {
       method: "POST",
       body: formData
     });
+  }
+
+  analyzeImage(imageBlob) {
+    return this.analyzeMultiSite({ left_eye: imageBlob });
   }
 
   getScreening(screeningId) {

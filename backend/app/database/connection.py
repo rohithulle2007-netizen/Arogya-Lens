@@ -1,5 +1,5 @@
 from typing import Generator
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker, Session
 from app.core.config import settings
 from app.database.base import Base
@@ -38,8 +38,27 @@ def get_db() -> Generator[Session, None, None]:
 
 def init_db() -> None:
     """
-    Initializes the database schema by creating all tables defined in models.
+    Initializes the database schema by creating all tables defined in models
+    and safely running SQLite column migrations.
     """
-    # Import models so that Base knows about them before calling create_all
     import app.database.models  # noqa: F401
     Base.metadata.create_all(bind=engine)
+
+    # Safe lightweight SQLite migration for new multi-site columns
+    if settings.DATABASE_URL.startswith("sqlite"):
+        with engine.connect() as conn:
+            try:
+                res = conn.execute(text("PRAGMA table_info(screenings)"))
+                columns = [row[1] for row in res.fetchall()]
+                new_cols = [
+                    ("left_eye_image_path", "VARCHAR(500)"),
+                    ("right_eye_image_path", "VARCHAR(500)"),
+                    ("left_thumb_image_path", "VARCHAR(500)"),
+                    ("right_thumb_image_path", "VARCHAR(500)"),
+                ]
+                for col_name, col_type in new_cols:
+                    if col_name not in columns:
+                        conn.execute(text(f"ALTER TABLE screenings ADD COLUMN {col_name} {col_type}"))
+                conn.commit()
+            except Exception as e:
+                print(f"Notice: database column sync ({e})")
