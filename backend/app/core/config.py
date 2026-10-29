@@ -29,6 +29,8 @@ class Settings:
     OTP_COOLDOWN_SECONDS: int = int(os.getenv("OTP_COOLDOWN_SECONDS", "30"))
     OTP_MAX_ATTEMPTS: int = int(os.getenv("OTP_MAX_ATTEMPTS", "5"))
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", os.getenv("ENV", "development")).lower()
+    DEMO_OTP_ENABLED: bool = os.getenv("DEMO_OTP_ENABLED", "false").lower() in ("true", "1", "yes")
+    ALLOW_MOCK_OTP: bool = os.getenv("ALLOW_MOCK_OTP", "false").lower() in ("true", "1", "yes")
 
     # External SMS Provider Credentials (optional)
     TWILIO_ACCOUNT_SID: str = os.getenv("TWILIO_ACCOUNT_SID", "")

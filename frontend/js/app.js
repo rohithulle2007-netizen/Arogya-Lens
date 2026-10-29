@@ -81,19 +81,6 @@ class Application {
       this.showScreen("loginScreen");
     });
 
-    // Back to Home Navigation buttons
-    document.getElementById("loginBackHomeBtn")?.addEventListener("click", () => {
-      this.showScreen("onboardingScreen");
-    });
-
-    document.getElementById("regBackHomeBtn")?.addEventListener("click", () => {
-      this.showScreen("onboardingScreen");
-    });
-
-    document.getElementById("otpHomeBtn")?.addEventListener("click", () => {
-      this.showScreen("onboardingScreen");
-    });
-
     // Bottom Navigation Bar Routing
     document.querySelectorAll(".nav-item[data-target]").forEach((btn) => {
       btn.addEventListener("click", async (e) => {
@@ -219,7 +206,11 @@ class Application {
       }
     }
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    const contentEl = document.querySelector(".app-content");
+    if (contentEl) contentEl.scrollTop = 0;
   }
 
   showToast(message, type = "info") {

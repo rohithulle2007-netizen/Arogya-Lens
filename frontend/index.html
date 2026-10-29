@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Arogya Lens — AI Non-Invasive Anaemia Screening</title>
+  <link rel="icon" href="data:,">
   
   <!-- Modern Typography Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -88,7 +89,7 @@
         <!-- Inline Status/Error Feedback -->
         <div id="regAlertBox" class="otp-alert-box" style="display: none; margin-bottom: 14px;"></div>
 
-        <form id="registerForm">
+        <form id="registerForm" novalidate>
           <div class="form-group">
             <label class="form-label" data-i18n="name">Full Name</label>
             <input type="text" id="regName" class="form-input" data-i18n="name_placeholder" placeholder="e.g. Priya Sharma" required>
@@ -115,7 +116,7 @@
             </div>
           </div>
 
-          <button type="submit" class="btn btn-primary" style="margin-top: 12px;" data-i18n="send_otp">Send OTP & Register</button>
+          <button type="submit" id="regSubmitBtn" class="btn btn-primary" style="margin-top: 12px;" data-i18n="send_otp">Send OTP & Register</button>
         </form>
 
         <div style="text-align: center; margin-top: 20px;">
@@ -138,13 +139,13 @@
         <!-- Inline Status/Error Feedback -->
         <div id="loginAlertBox" class="otp-alert-box" style="display: none; margin-bottom: 14px;"></div>
 
-        <form id="loginForm">
+        <form id="loginForm" novalidate>
           <div class="form-group">
             <label class="form-label" data-i18n="phone_number">Mobile Number</label>
             <input type="tel" id="loginMobile" class="form-input" data-i18n="phone_placeholder" placeholder="10-digit mobile" maxlength="10" required>
           </div>
 
-          <button type="submit" class="btn btn-primary" style="margin-top: 12px;" data-i18n="send_otp">Send OTP</button>
+          <button type="submit" id="loginSubmitBtn" class="btn btn-primary" style="margin-top: 12px;" data-i18n="send_otp">Send OTP</button>
         </form>
 
         <div style="text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 16px;">
@@ -165,15 +166,22 @@
           <button id="changeMobileBtn" type="button" style="background: none; border: none; color: var(--primary-teal); font-size: 0.82rem; font-weight: 600; text-decoration: underline; cursor: pointer; margin-left: 6px;">Change</button>
         </p>
 
-        <!-- Development / Test OTP Banner (Displayed only when SMS provider not active) -->
+        <!-- DEMO MODE Banner (Displayed ONLY when backend explicitly reports delivery_mode: 'mock') -->
         <div id="devOtpCard" class="dev-otp-card" style="display: none;">
           <div class="dev-otp-badge-row">
-            <span class="badge badge-warning" style="font-size: 0.7rem; padding: 2px 8px;">Development Test Mode</span>
-            <span class="dev-otp-note">SMS provider not configured</span>
+            <span class="badge badge-warning" style="font-size: 0.75rem; padding: 3px 8px; font-weight: 700; letter-spacing: 0.5px;">DEMO MODE — TEST OTP ONLY</span>
+            <span class="dev-otp-note" style="color: #92400e; font-weight: 600;">No SMS will be sent</span>
           </div>
+          <p style="font-size: 0.8rem; color: var(--text-muted); margin: 6px 0 10px 0; line-height: 1.4;">
+            Active for demonstration and academic evaluation. Use the fixed test code below to verify and continue.
+          </p>
           <div class="dev-otp-action-row">
             <span>Test OTP: <strong id="devOtpCodeDisplay" class="dev-otp-code">123456</strong></span>
-            <button type="button" id="autoFillOtpBtn" class="btn-tag">Auto-Fill</button>
+            <button type="button" id="autoFillOtpBtn" class="btn-tag">Auto-Fill Code</button>
+          </div>
+          <div style="font-size: 0.74rem; color: #92400e; background: rgba(254, 243, 199, 0.7); padding: 8px 10px; border-radius: var(--radius-xs); margin-top: 10px; display: flex; align-items: flex-start; gap: 6px; line-height: 1.35; border: 1px solid rgba(245, 158, 11, 0.3);">
+            <span style="font-size: 0.9rem; line-height: 1;">⚠️</span>
+            <span><strong>Notice:</strong> Fixed test credentials allow simulated access. Demo accounts are not suitable for real patients or sensitive clinical medical data.</span>
           </div>
         </div>
 

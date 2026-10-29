@@ -1,3 +1,4 @@
+import os
 import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, Optional
@@ -59,12 +60,14 @@ def _generate_and_dispatch_otp(mobile_number: str, is_resend: bool = False) -> t
         delivery_mode = "sms"
         dev_otp = None
     else:
-        # Development / Testing Mode
-        if settings.ENVIRONMENT == "production":
+        # Development / Demo Mode Handling
+        is_demo_active = bool(settings.DEMO_OTP_ENABLED or settings.ALLOW_MOCK_OTP)
+        if settings.ENVIRONMENT == "production" and not is_demo_active:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-                detail="SMS gateway service is not configured on this production instance.",
+                detail="SMS gateway service is not configured on this production instance and Demo OTP mode is disabled. To enable demonstration logins, configure DEMO_OTP_ENABLED=true in environment settings.",
             )
+
         otp_code = DEV_MOCK_OTP
         delivery_mode = "mock"
         dev_otp = DEV_MOCK_OTP

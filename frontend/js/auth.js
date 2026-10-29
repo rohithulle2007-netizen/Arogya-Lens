@@ -58,12 +58,21 @@ class AuthManager {
       const rawMobile = mobileInput?.value?.trim() || "";
       const mobile = this.cleanMobile(rawMobile);
 
-      if (!this.validateMobile(mobile)) {
-        this.showLoginAlert("Please enter a valid 10-digit mobile number.", "error");
-        window.App.showToast("Please enter a valid 10-digit mobile number", "error");
+      if (!mobile) {
+        this.showLoginAlert("Please enter your 10-digit mobile number.", "error");
+        window.App.showToast("Please enter your mobile number", "error");
+        mobileInput?.classList.add("error");
         mobileInput?.focus();
         return;
       }
+      if (!this.validateMobile(mobile)) {
+        this.showLoginAlert("Please enter a valid 10-digit mobile number.", "error");
+        window.App.showToast("Please enter a valid 10-digit mobile number", "error");
+        mobileInput?.classList.add("error");
+        mobileInput?.focus();
+        return;
+      }
+      mobileInput?.classList.remove("error");
 
       const submitBtn = e.target.querySelector('button[type="submit"]');
       const originalText = submitBtn?.textContent || "Send OTP";
@@ -121,30 +130,49 @@ class AuthManager {
       e.preventDefault();
       this.clearErrors();
 
-      const name = document.getElementById("regName")?.value?.trim();
-      const rawMobile = document.getElementById("regMobile")?.value?.trim() || "";
+      const nameInput = document.getElementById("regName");
+      const mobileInput = document.getElementById("regMobile");
+      const ageInput = document.getElementById("regAge");
+
+      const name = nameInput?.value?.trim() || "";
+      const rawMobile = mobileInput?.value?.trim() || "";
       const mobile = this.cleanMobile(rawMobile);
-      const age = parseInt(document.getElementById("regAge")?.value, 10);
+      const age = parseInt(ageInput?.value, 10);
       const sex = document.getElementById("regSex")?.value;
 
       if (!name || name.length < 2) {
         this.showRegAlert("Please enter a valid full name (minimum 2 characters).", "error");
         window.App.showToast("Please enter a valid full name", "error");
-        document.getElementById("regName")?.focus();
+        nameInput?.classList.add("error");
+        nameInput?.focus();
+        return;
+      }
+      nameInput?.classList.remove("error");
+
+      if (!mobile) {
+        this.showRegAlert("Please enter your 10-digit mobile number.", "error");
+        window.App.showToast("Please enter your mobile number", "error");
+        mobileInput?.classList.add("error");
+        mobileInput?.focus();
         return;
       }
       if (!this.validateMobile(mobile)) {
         this.showRegAlert("Please enter a valid 10-digit mobile number.", "error");
         window.App.showToast("Please enter a valid 10-digit mobile number", "error");
-        document.getElementById("regMobile")?.focus();
+        mobileInput?.classList.add("error");
+        mobileInput?.focus();
         return;
       }
-      if (!age || age < 1 || age > 120) {
+      mobileInput?.classList.remove("error");
+
+      if (isNaN(age) || age < 1 || age > 120) {
         this.showRegAlert("Please enter a valid age between 1 and 120.", "error");
-        window.App.showToast("Please enter a valid age (1-120)", "error");
-        document.getElementById("regAge")?.focus();
+        window.App.showToast("Please enter a valid age", "error");
+        ageInput?.classList.add("error");
+        ageInput?.focus();
         return;
       }
+      ageInput?.classList.remove("error");
 
       this.cachedRegistrationData = { name, mobile_number: mobile, age, sex };
 
@@ -212,11 +240,17 @@ class AuthManager {
         window.App.showLoading(true);
         const res = await window.API.sendOtp(this.pendingMobile);
         
-        if (res.dev_otp) {
+        if (res && res.delivery_mode === "mock" && res.dev_otp) {
+          const devCard = document.getElementById("devOtpCard");
           const devCodeEl = document.getElementById("devOtpCodeDisplay");
           if (devCodeEl) devCodeEl.textContent = res.dev_otp;
-          this.showAlert("A new development test code has been generated.", "success");
+          if (devCard) devCard.style.display = "block";
+          this.showAlert("Demo verification code refreshed. Use test OTP: " + res.dev_otp, "info");
         } else {
+          const devCard = document.getElementById("devOtpCard");
+          const devCodeEl = document.getElementById("devOtpCodeDisplay");
+          if (devCodeEl) devCodeEl.textContent = "";
+          if (devCard) devCard.style.display = "none";
           this.showAlert("A new verification code has been dispatched via SMS.", "success");
         }
 
@@ -318,8 +352,10 @@ class AuthManager {
       });
     });
 
-    // Auto-fill Test Code Helper (Dev Mode only)
+    // Auto-fill Test Code Helper (Demo Mode only)
     document.getElementById("autoFillOtpBtn")?.addEventListener("click", () => {
+      const devCard = document.getElementById("devOtpCard");
+      if (!devCard || devCard.style.display === "none") return;
       const code = document.getElementById("devOtpCodeDisplay")?.textContent?.trim() || "123456";
       inputs.forEach((box, i) => {
         box.value = code[i] || "";
@@ -413,13 +449,14 @@ class AuthManager {
       titleEl.textContent = mode === "register" ? "Verify & Register" : "Verify Mobile";
     }
 
-    // Dev / Demo Mode Notice
+    // DEMO MODE Banner (Displayed ONLY when backend explicitly reports delivery_mode: 'mock')
     const devCard = document.getElementById("devOtpCard");
     const devCodeEl = document.getElementById("devOtpCodeDisplay");
     if (response && response.delivery_mode === "mock" && response.dev_otp) {
       if (devCodeEl) devCodeEl.textContent = response.dev_otp;
       if (devCard) devCard.style.display = "block";
     } else {
+      if (devCodeEl) devCodeEl.textContent = "";
       if (devCard) devCard.style.display = "none";
     }
 

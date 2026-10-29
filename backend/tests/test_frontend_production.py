@@ -101,3 +101,42 @@ def test_form_alert_containers_exist():
     assert "regAlertBox" in index_html, "Missing regAlertBox in index.html"
     assert "otpAlertBox" in index_html, "Missing otpAlertBox in index.html"
 
+
+def test_forms_have_novalidate_and_explicit_submit_button_ids():
+    """Verify forms have novalidate to prevent silent HTML5 validation blocks."""
+    index_html = (FRONTEND_DIR / "index.html").read_text(encoding="utf-8")
+    assert '<form id="loginForm" novalidate>' in index_html, "loginForm must have novalidate"
+    assert '<form id="registerForm" novalidate>' in index_html, "registerForm must have novalidate"
+    assert 'id="loginSubmitBtn"' in index_html, "Missing loginSubmitBtn ID"
+    assert 'id="regSubmitBtn"' in index_html, "Missing regSubmitBtn ID"
+
+
+def test_event_handlers_are_not_registered_twice():
+    """Verify navigation event handlers are defined once without duplication."""
+    app_js = (FRONTEND_DIR / "js" / "app.js").read_text(encoding="utf-8")
+    auth_js = (FRONTEND_DIR / "js" / "auth.js").read_text(encoding="utf-8")
+
+    # regBackHomeBtn should be handled in auth.js, not duplicated in app.js
+    assert "regBackHomeBtn" not in app_js, "regBackHomeBtn listener should not be duplicated in app.js"
+    assert "loginBackHomeBtn" not in app_js, "loginBackHomeBtn listener should not be duplicated in app.js"
+    assert "regBackHomeBtn" in auth_js, "regBackHomeBtn listener must be in auth.js"
+    assert "loginBackHomeBtn" in auth_js, "loginBackHomeBtn listener must be in auth.js"
+
+
+def test_frontend_displays_demo_otp_only_when_backend_reports_mock_delivery():
+    """Verify that frontend strictly requires delivery_mode === 'mock' from backend to show test OTP."""
+    index_html = (FRONTEND_DIR / "index.html").read_text(encoding="utf-8")
+    auth_js = (FRONTEND_DIR / "js" / "auth.js").read_text(encoding="utf-8")
+
+    # Banner & Warnings in index.html
+    assert "DEMO MODE — TEST OTP ONLY" in index_html, "Missing DEMO MODE banner in index.html"
+    assert "devOtpCard" in index_html, "Missing devOtpCard container in index.html"
+    assert "devOtpCodeDisplay" in index_html, "Missing devOtpCodeDisplay in index.html"
+    assert "not suitable for real patients" in index_html.lower() or "not suitable for real users" in index_html.lower(), \
+        "Missing clinical disclaimer warning in demo OTP banner"
+
+    # auth.js logic verifying delivery_mode === 'mock'
+    assert 'response.delivery_mode === "mock"' in auth_js, "auth.js must check response.delivery_mode === 'mock'"
+    assert 'devCard.style.display = "none"' in auth_js, "auth.js must hide devCard when not mock"
+
+

@@ -154,6 +154,26 @@ Expected Output:
 
 ---
 
+## 🌐 Production Deployment (Render)
+
+When deploying to Render Web Services:
+
+- **Build Command:** `pip install -r backend/requirements.txt`
+- **Start Command:** `uvicorn app.main:app --host 0.0.0.0 --port $PORT --app-dir backend`
+- **Health Check Path:** `/api/health`
+
+### Required Render Environment Variables:
+| Variable | Value | Description |
+|---|---|---|
+| `ENVIRONMENT` | `production` | Enables production mode |
+| `DEMO_OTP_ENABLED` | `true` | Enables clearly labeled college demo OTP (`123456`) without SMS provider |
+| `SECRET_KEY` | *(generate 64-char key)* | Cryptographic key for JWT tokens |
+| `ALLOWED_ORIGINS` | `https://rohithulle2007-netizen.github.io` | Permits GitHub Pages frontend CORS |
+| `DATABASE_URL` | `sqlite:///./arogya_lens.db` | Local SQLite database file |
+| `UPLOAD_DIR` | `./uploads` | Image upload directory |
+
+---
+
 ## 🛠️ Common Troubleshooting
 
 | Issue | Cause | Solution |
