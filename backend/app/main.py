@@ -78,6 +78,10 @@ async def generic_exception_handler(request: Request, exc: Exception):
     )
 
 
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, JSONResponse
+
 # Include API Routers
 app.include_router(auth_router)
 app.include_router(users_router)
@@ -87,8 +91,87 @@ app.include_router(history_router)
 app.include_router(dashboard_router)
 
 
-@app.get("/", tags=["Root"])
-def read_root():
+# Determine Frontend and Upload directories
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+PROJECT_ROOT = BASE_DIR.parent if BASE_DIR.name == "backend" else BASE_DIR
+
+FRONTEND_DIR = PROJECT_ROOT / "frontend"
+UPLOADS_DIR = Path(settings.UPLOAD_DIR)
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+
+# Mount Uploads directory for scan images
+if UPLOADS_DIR.exists():
+    app.mount("/uploads", StaticFiles(directory=str(UPLOADS_DIR)), name="uploads")
+
+# Mount Frontend static files (CSS, JS, Assets)
+if FRONTEND_DIR.exists():
+    css_dir = FRONTEND_DIR / "css"
+    if css_dir.exists():
+        app.mount("/css", StaticFiles(directory=str(css_dir)), name="css")
+
+    js_dir = FRONTEND_DIR / "js"
+    if js_dir.exists():
+        app.mount("/js", StaticFiles(directory=str(js_dir)), name="js")
+
+    assets_dir = FRONTEND_DIR / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+
+
+@app.get("/", tags=["App & API Root"])
+async def serve_app(request: Request):
+    """
+    Serves the primary Arogya Lens Single Page Application for browsers (text/html)
+    and JSON service metadata for programmatic/API clients.
+    """
+    accept = request.headers.get("accept", "")
+    index_file = FRONTEND_DIR / "index.html"
+
+    # If requested by a browser navigating to the page
+    if "text/html" in accept and index_file.exists():
+        return FileResponse(str(index_file))
+
+    # If requested by an API client, test runner, or curl requesting JSON
+    if "application/json" in accept or "text/html" not in accept:
+        return {
+            "message": "Welcome to Arogya Lens API",
+            "service": settings.APP_NAME,
+            "version": settings.APP_VERSION,
+            "docs": "/docs",
+            "redoc": "/redoc",
+            "health": "/api/health",
+        }
+
+    if index_file.exists():
+        return FileResponse(str(index_file))
+
+    return {
+        "message": "Welcome to Arogya Lens API",
+        "service": settings.APP_NAME,
+        "version": settings.APP_VERSION,
+        "docs": "/docs",
+        "redoc": "/redoc",
+        "health": "/api/health",
+    }
+
+
+@app.get("/app", tags=["App"])
+async def serve_app_direct():
+    """
+    Direct route to serve the web application interface.
+    """
+    index_file = FRONTEND_DIR / "index.html"
+    if index_file.exists():
+        return FileResponse(str(index_file))
+    return JSONResponse(
+        status_code=404,
+        content={"detail": "Frontend index.html not found"}
+    )
+
+
+
+@app.get("/api", tags=["API Root"])
+def read_api_root():
     """
     Root endpoint providing service information and links to documentation.
     """
@@ -113,3 +196,4 @@ def health_check():
         "service": "Arogya Lens API",
         "version": "1.0.0",
     }
+

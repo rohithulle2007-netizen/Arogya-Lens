@@ -13,22 +13,28 @@ const getApiBaseUrl = () => {
   if (window.location.port === '8000') {
     return window.location.origin;
   }
+  // If hosted on GitHub Pages and no custom backend URL is stored
+  if (hostname.endsWith('github.io')) {
+    return '';
+  }
   // If running locally
   if (hostname === 'localhost' || hostname === '127.0.0.1') {
     return `http://${hostname}:8000`;
   }
-  // Default to relative or current host on port 8000
-  return `http://${hostname}:8000`;
+  // Default to origin or port 8000
+  return window.location.origin;
 };
 
 const CONFIG = {
-  // Point to FastAPI Backend on port 8000
+  // Point to FastAPI Backend (or empty for offline demo)
   API_BASE_URL: getApiBaseUrl(),
   
   // Storage Keys
   STORAGE_TOKEN_KEY: "arogya_lens_jwt_token",
   STORAGE_USER_KEY: "arogya_lens_user",
   STORAGE_LANG_KEY: "arogya_lens_lang",
+  STORAGE_API_URL_KEY: "arogya_api_base_url",
+  STORAGE_DEMO_MODE_KEY: "arogya_demo_mode",
 
   // Clinical Reference Ranges (for UI representation)
   ADULT_NORMAL_MIN: 12.0,

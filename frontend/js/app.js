@@ -39,9 +39,42 @@ class Application {
       window.I18N.toggleLanguage();
     });
 
-    // Onboarding Agree
+    // Server API Configuration
+    document.getElementById("serverConfigBtn")?.addEventListener("click", () => {
+      const currentUrl = window.API.baseUrl || "";
+      const promptVal = prompt(
+        "Arogya Lens Backend Server URL:\n\nEnter your deployed FastAPI server URL (e.g. https://your-backend.railway.app, https://arogya-lens.onrender.com, or http://127.0.0.1:8000).\nLeave blank to use Interactive Demo Mode:",
+        currentUrl
+      );
+      if (promptVal !== null) {
+        const cleanUrl = promptVal.trim().replace(/\/+$/, "");
+        window.API.setBaseUrl(cleanUrl);
+        if (cleanUrl) {
+          window.API.disableDemoMode();
+          this.showToast(`Backend API set to: ${cleanUrl}`, "success");
+        } else {
+          this.showToast("Using Interactive Demo Mode (Client-side)", "info");
+        }
+      }
+    });
+
+    // Onboarding Navigation
+    document.getElementById("getStartedBtn")?.addEventListener("click", () => {
+      this.showScreen("registerScreen");
+    });
+
+    document.getElementById("onboardingLoginBtn")?.addEventListener("click", () => {
+      this.showScreen("loginScreen");
+    });
+
     document.getElementById("onboardingAgreeBtn")?.addEventListener("click", () => {
       this.showScreen("loginScreen");
+    });
+
+    document.getElementById("quickDemoBtn")?.addEventListener("click", async () => {
+      if (window.Auth && typeof window.Auth.demoLogin === "function") {
+        await window.Auth.demoLogin();
+      }
     });
 
     // Bottom Navigation Bar Routing
@@ -83,23 +116,24 @@ class Application {
       this.currentScreenId = screenId;
     }
 
-    // Toggle bottom navigation visibility
-    const authScreens = ["onboardingScreen", "loginScreen", "registerScreen", "otpScreen", "scannerScreen", "analyzingScreen"];
+    // Manage bottom navigation active states & visibility
     const bottomNav = document.getElementById("bottomNav");
+    const authedScreens = ["homeScreen", "dashboardScreen", "historyScreen", "profileScreen"];
+
     if (bottomNav) {
-      bottomNav.style.display = authScreens.includes(screenId) ? "none" : "flex";
-    }
-
-    // Update active nav icon
-    document.querySelectorAll(".nav-item").forEach(item => {
-      if (item.getAttribute("data-target") === screenId) {
-        item.classList.add("active");
+      if (authedScreens.includes(screenId)) {
+        bottomNav.style.display = "flex";
+        document.querySelectorAll(".nav-item").forEach(item => {
+          if (item.getAttribute("data-target") === screenId) {
+            item.classList.add("active");
+          } else {
+            item.classList.remove("active");
+          }
+        });
       } else {
-        item.classList.remove("active");
+        bottomNav.style.display = "none";
       }
-    });
-
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   }
 
   showToast(message, type = "info") {
@@ -107,26 +141,27 @@ class Application {
     if (!container) return;
 
     const toast = document.createElement("div");
-    toast.className = `toast ${type === "error" ? "toast-error" : type === "success" ? "toast-success" : ""}`;
+    toast.className = `toast toast-${type}`;
     toast.textContent = message;
+
     container.appendChild(toast);
 
     setTimeout(() => {
-      toast.style.opacity = "0";
-      toast.style.transform = "translateY(-10px)";
+      toast.classList.add("fade-out");
       setTimeout(() => toast.remove(), 300);
-    }, 3500);
+    }, 3200);
   }
 
-  showLoading(isLoading) {
-    const spinner = document.getElementById("globalLoadingOverlay");
-    if (spinner) {
-      spinner.style.display = isLoading ? "flex" : "none";
+  showLoading(visible = true) {
+    const overlay = document.getElementById("globalLoadingOverlay");
+    if (overlay) {
+      overlay.style.display = visible ? "flex" : "none";
     }
   }
 }
 
 window.App = new Application();
+
 document.addEventListener("DOMContentLoaded", () => {
   window.App.init();
 });

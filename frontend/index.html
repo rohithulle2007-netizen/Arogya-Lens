@@ -35,7 +35,10 @@
         <div class="header-logo">A</div>
         <span class="header-title" data-i18n="app_title">Arogya Lens</span>
       </div>
-      <button id="langToggleBtn" class="lang-toggle-btn" type="button">हिन्दी</button>
+      <div style="display: flex; gap: 8px; align-items: center;">
+        <button id="serverConfigBtn" class="lang-toggle-btn" type="button" title="Configure Backend API Server" style="font-size: 0.78rem;">🌐 API</button>
+        <button id="langToggleBtn" class="lang-toggle-btn" type="button">हिन्दी</button>
+      </div>
     </header>
 
     <!-- Main Dynamic Content Views -->
@@ -68,6 +71,7 @@
         <div style="display: flex; flex-direction: column; gap: 12px;">
           <button id="getStartedBtn" class="btn btn-primary" data-i18n="register">Register as New Patient</button>
           <button id="onboardingLoginBtn" class="btn btn-secondary" data-i18n="login">Log In with Mobile OTP</button>
+          <button id="quickDemoBtn" type="button" class="btn btn-secondary" style="background: var(--primary-teal-surface); color: var(--primary-teal-dark); border-color: rgba(13,148,136,0.3);">⚡ Instant Demo Mode (1-Click)</button>
         </div>
       </section>
 
@@ -107,7 +111,7 @@
         </form>
 
         <div style="text-align: center; margin-top: 20px;">
-          <button id="goToRegisterLoginBtn" type="button" style="background: none; border: none; color: var(--primary-teal); font-weight: 600; cursor: pointer;">Already registered? Log In</button>
+          <button id="goToLoginBtn" type="button" style="background: none; border: none; color: var(--primary-teal); font-weight: 600; cursor: pointer;">Already registered? Log In</button>
         </div>
       </section>
 
@@ -125,8 +129,8 @@
           <button type="submit" class="btn btn-primary" style="margin-top: 12px;" data-i18n="send_otp">Send OTP</button>
         </form>
 
-        <div style="text-align: center; margin-top: 20px;">
-          <button id="goToLoginBtn" type="button" style="background: none; border: none; color: var(--primary-teal); font-weight: 600; cursor: pointer;">Need an account? Register</button>
+        <div style="text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 16px;">
+          <button id="goToRegisterBtn" type="button" style="background: none; border: none; color: var(--primary-teal); font-weight: 600; cursor: pointer;">Need an account? Register</button>
         </div>
       </section>
 
@@ -146,12 +150,15 @@
 
         <button id="verifyOtpBtn" class="btn btn-primary" data-i18n="verify_btn">Verify & Continue</button>
 
-        <div style="text-align: center; margin-top: 20px;">
+        <div style="text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 16px; align-items: center;">
           <button id="resendOtpBtn" type="button" style="background: none; border: none; color: var(--text-muted); font-size: 0.85rem; cursor: pointer;">
             <span data-i18n="resend_otp">Resend Code</span> <span id="otpTimer"></span>
           </button>
+          <span style="color: var(--border-light);">|</span>
+          <button id="otpBackBtn" type="button" style="background: none; border: none; color: var(--primary-teal); font-size: 0.85rem; cursor: pointer;">Back to Login</button>
         </div>
       </section>
+
 
       <!-- 5. Home Screen -->
       <section id="homeScreen" class="screen-view">
@@ -181,16 +188,19 @@
         <div class="scanner-view-wrapper">
           
           <!-- Step Progress Tracker -->
-          <div class="scanner-step-tracker">
+          <div class="scanner-step-tracker" style="display: flex; justify-content: space-between; align-items: center;">
             <div id="scannerStepLabel" class="scanner-step-label">
               <span id="scannerStepIcon">👁️</span>
               <span id="scannerStepText">Step 1 of 4: Left Eye</span>
             </div>
-            <div class="scanner-step-dots">
-              <div id="stepDot1" class="step-dot active"></div>
-              <div id="stepDot2" class="step-dot"></div>
-              <div id="stepDot3" class="step-dot"></div>
-              <div id="stepDot4" class="step-dot"></div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="scanner-step-dots">
+                <div id="stepDot1" class="step-dot active"></div>
+                <div id="stepDot2" class="step-dot"></div>
+                <div id="stepDot3" class="step-dot"></div>
+                <div id="stepDot4" class="step-dot"></div>
+              </div>
+              <button id="closeScannerBtn" type="button" style="background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px 8px; font-size: 1.1rem; font-weight: bold;" title="Cancel Scan">✕</button>
             </div>
           </div>
 
@@ -231,11 +241,15 @@
                 <div class="shutter-inner"></div>
               </button>
 
-              <div style="width: 44px;"></div>
+              <label id="uploadScanLabel" class="camera-switch-btn" title="Upload Image File" style="cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <input type="file" id="fileUploadInput" accept="image/*" style="display: none;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              </label>
             </div>
           </div>
         </div>
       </section>
+
 
       <!-- 7. 4-Card Capture Review Screen -->
       <section id="captureReviewScreen" class="screen-view">

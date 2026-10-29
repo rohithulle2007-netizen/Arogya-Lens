@@ -71,6 +71,22 @@ class ScannerManager {
       await this.launchCurrentStep();
     });
 
+    // Close Scanner
+    document.getElementById("closeScannerBtn")?.addEventListener("click", () => {
+      window.Camera.stopCamera();
+      clearInterval(this.alignmentInterval);
+      window.App.showScreen("homeScreen");
+    });
+
+    // File Upload Alternative for Desktop/Test
+    document.getElementById("fileUploadInput")?.addEventListener("change", (e) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        this.handleFileUpload(file);
+        e.target.value = "";
+      }
+    });
+
     // Flip Camera
     document.getElementById("flipCameraBtn")?.addEventListener("click", async () => {
       try {
@@ -84,6 +100,7 @@ class ScannerManager {
     document.getElementById("shutterBtn")?.addEventListener("click", async () => {
       await this.handleShutterCapture();
     });
+
 
     // Review Screen Actions: Individual Retakes
     document.getElementById("retakeLeftEyeBtn")?.addEventListener("click", async () => {
@@ -268,6 +285,37 @@ class ScannerManager {
       window.App.showToast("Failed to capture photo: " + err.message, "error");
     }
   }
+
+  handleFileUpload(file) {
+    try {
+      const currentStep = SCAN_STEPS[this.currentStepIndex];
+      this.scans[currentStep.key] = file;
+
+      this.updateReviewThumbnail(currentStep.key, file);
+      window.App.showToast(`${currentStep.icon} ${window.I18N.t(currentStep.labelKey)} Uploaded!`, "success");
+
+      if (this.singleRetakeKey) {
+        this.singleRetakeKey = null;
+        window.Camera.stopCamera();
+        clearInterval(this.alignmentInterval);
+        window.App.showScreen("captureReviewScreen");
+        return;
+      }
+
+      if (this.currentStepIndex < 3) {
+        this.currentStepIndex++;
+        this.updateStepUI();
+        this.startAlignmentHeuristics();
+      } else {
+        window.Camera.stopCamera();
+        clearInterval(this.alignmentInterval);
+        window.App.showScreen("captureReviewScreen");
+      }
+    } catch (err) {
+      window.App.showToast("Upload failed: " + err.message, "error");
+    }
+  }
+
 
   updateReviewThumbnail(key, blob) {
     const imgMap = {
