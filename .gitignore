@@ -44,6 +44,7 @@ htmlcov/
 *.db
 *.sqlite
 *.sqlite3
+.backups/
 
 # --- Uploaded Patient Eye Photographs (Preserve directory structure only) ---
 uploads/*
