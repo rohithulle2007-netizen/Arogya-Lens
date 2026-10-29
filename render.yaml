@@ -24,7 +24,3 @@ services:
         value: sqlite:////app/data/arogya_lens.db
       - key: UPLOAD_DIR
         value: /app/data/uploads
-    disk:
-      name: arogya-lens-storage
-      mountPath: /app/data
-      sizeGB: 1

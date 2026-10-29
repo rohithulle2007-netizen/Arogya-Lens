@@ -6,6 +6,7 @@ from sqlalchemy.pool import StaticPool
 from app.main import app
 from app.database.base import Base
 from app.database.connection import get_db
+from app.services.auth_service import clear_otp_cache
 
 TEST_DB_URL = "sqlite:///:memory:"
 test_engine = create_engine(
@@ -30,7 +31,9 @@ def clean_tables():
         for table in reversed(Base.metadata.sorted_tables):
             conn.execute(table.delete())
         conn.commit()
+    clear_otp_cache()
     yield
+    clear_otp_cache()
 
 
 @pytest.fixture

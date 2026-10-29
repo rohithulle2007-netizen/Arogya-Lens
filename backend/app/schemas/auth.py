@@ -43,6 +43,9 @@ class SendOTPRequest(BaseModel):
 class SendOTPResponse(BaseModel):
     message: str
     mobile_number: str
+    delivery_mode: str = "mock"
+    dev_otp: Optional[str] = None
+    cooldown_seconds: int = 30
 
 
 class VerifyOTPRequest(BaseModel):

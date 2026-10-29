@@ -14,12 +14,14 @@ client = TestClient(app)
 
 def _get_auth_headers(mobile: str = "9988776655") -> dict:
     """Registers and verifies a test user to obtain Bearer auth headers."""
-    client.post("/api/auth/register", json={
+    reg = client.post("/api/auth/register", json={
         "name": "ML Test User",
         "mobile_number": mobile,
         "sex": "female",
         "age": 30
     })
+    if reg.status_code != 201:
+        client.post("/api/auth/send-otp", json={"mobile_number": mobile})
     res = client.post("/api/auth/verify-otp", json={
         "mobile_number": mobile,
         "otp": "123456"

@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
     inputs:
       api_base_url:
-        description: 'Optional Production Backend API URL (leave blank for built-in Demo Mode)'
+        description: 'Production Backend API URL (e.g. https://your-backend.up.railway.app)'
         required: false
         default: ''
         type: string
@@ -45,14 +45,38 @@ jobs:
         working-directory: frontend
         run: npm ci
 
+      - name: Validate Production API Configuration
+        run: |
+          API_URL="${{ inputs.api_base_url || vars.VITE_API_BASE_URL || '' }}"
+          # Trim whitespace and trailing slashes
+          API_URL=$(echo "$API_URL" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s:/*$::')
+
+          if [ -z "$API_URL" ]; then
+            echo "::warning file=.github/workflows/deploy-frontend.yml::No 'VITE_API_BASE_URL' provided. Deploying frontend in standalone mode with public homepage, informational views, and navigation. Backend authentication will require configuring VITE_API_BASE_URL."
+            echo "VALIDATED_API_BASE_URL=" >> $GITHUB_ENV
+          else
+            if [[ ! "$API_URL" =~ ^https:// ]]; then
+              echo "::error file=.github/workflows/deploy-frontend.yml::DEPLOYMENT HALTED: 'VITE_API_BASE_URL' must start with 'https://' (HTTPS required for GitHub Pages). Provided: '$API_URL'"
+              exit 1
+            fi
+
+            if [[ "$API_URL" =~ (localhost|127\.0\.0\.1) ]]; then
+              echo "::error file=.github/workflows/deploy-frontend.yml::DEPLOYMENT HALTED: 'VITE_API_BASE_URL' cannot be localhost in production. Provided: '$API_URL'"
+              exit 1
+            fi
+
+            echo "✅ Production API URL validated: $API_URL"
+            echo "VALIDATED_API_BASE_URL=$API_URL" >> $GITHUB_ENV
+          fi
+
       - name: Build Frontend Application
         working-directory: frontend
         env:
-          # Production backend API URL configured via repository variable (vars) or manual dispatch input (never secrets)
-          VITE_API_BASE_URL: ${{ inputs.api_base_url || vars.VITE_API_BASE_URL || '' }}
-          # Relative base path ensures assets load cleanly at https://USERNAME.github.io/REPOSITORY/
+          VITE_API_BASE_URL: ${{ env.VALIDATED_API_BASE_URL }}
           VITE_BASE_PATH: './'
-        run: npm run build
+        run: |
+          echo "Building Arogya Lens frontend connected to backend: $VITE_API_BASE_URL"
+          npm run build
 
       - name: Security and Isolation Audit
         run: |

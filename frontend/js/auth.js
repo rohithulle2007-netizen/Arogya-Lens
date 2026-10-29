@@ -30,6 +30,23 @@ class AuthManager {
       this.clearErrors();
     });
 
+    // Return to Home navigation
+    document.getElementById("loginBackHomeBtn")?.addEventListener("click", () => {
+      window.App.showScreen("onboardingScreen");
+      this.clearErrors();
+    });
+
+    document.getElementById("regBackHomeBtn")?.addEventListener("click", () => {
+      window.App.showScreen("onboardingScreen");
+      this.clearErrors();
+    });
+
+    document.getElementById("otpHomeBtn")?.addEventListener("click", () => {
+      clearInterval(this.otpTimerInterval);
+      window.App.showScreen("onboardingScreen");
+      this.clearErrors();
+    });
+
     // Login Form Submit (Send OTP)
     document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -55,6 +72,14 @@ class AuthManager {
         this.openOtpScreen({ mobile, mode: "login", response: res });
       } catch (err) {
         const msg = err.message || "Failed to send OTP";
+        if (msg.includes("No backend API")) {
+          window.App.showToast("Arogya Lens backend server is not connected. Please deploy or connect the backend service.", "error");
+          return;
+        }
+        if (msg.includes("Unable to connect")) {
+          window.App.showToast("Unable to connect to Arogya Lens API server. Please check your connection or verify the server is running.", "error");
+          return;
+        }
         if (
           msg.toLowerCase().includes("not registered") ||
           msg.toLowerCase().includes("not found") ||
@@ -118,6 +143,14 @@ class AuthManager {
         this.openOtpScreen({ mobile, mode: "register", response: res });
       } catch (err) {
         const msg = err.message || "Registration failed";
+        if (msg.includes("No backend API")) {
+          window.App.showToast("Arogya Lens backend server is not connected. Please deploy or connect the backend service.", "error");
+          return;
+        }
+        if (msg.includes("Unable to connect")) {
+          window.App.showToast("Unable to connect to Arogya Lens API server. Please check your connection or verify the server is running.", "error");
+          return;
+        }
         if (msg.toLowerCase().includes("already registered")) {
           window.App.showToast("Mobile number is already registered. Redirecting to login...", "info");
           const loginMobile = document.getElementById("loginMobile");
@@ -445,64 +478,6 @@ class AuthManager {
 
   validateMobile(num) {
     return /^[6-9]\d{9}$/.test(num);
-  }
-
-  async demoLogin() {
-    const demoMobile = "9876543210";
-    try {
-      window.App.showLoading(true);
-      let backendReachable = false;
-      const apiUrl = window.CONFIG?.API_BASE_URL;
-
-      if (apiUrl) {
-        try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 2000);
-          const ping = await fetch(`${apiUrl}/api/health`, { method: "GET", signal: controller.signal });
-          clearTimeout(timeoutId);
-          if (ping.ok) backendReachable = true;
-        } catch (e) {
-          backendReachable = false;
-        }
-      }
-
-      if (backendReachable) {
-        try {
-          await window.API.sendOtp(demoMobile);
-        } catch (e) {
-          try {
-            await window.API.register({
-              name: "Priya Sharma",
-              mobile_number: demoMobile,
-              age: 28,
-              sex: "female",
-            });
-          } catch (regErr) {
-            console.log("Demo user existing/ready:", regErr.message);
-          }
-          await window.API.sendOtp(demoMobile);
-        }
-
-        const res = await window.API.verifyOtp(demoMobile, "123456");
-        window.API.setToken(res.access_token);
-        window.API.disableDemoMode();
-        window.App.showToast("Logged in to Live Server (Priya Sharma)", "success");
-      } else {
-        // Run full offline / GitHub Pages demo mode
-        window.API.enableDemoMode();
-        window.App.showToast("Interactive Demo Mode Activated (No backend required)", "success");
-      }
-
-      await window.App.loadUserSession();
-      window.App.showScreen("homeScreen");
-    } catch (err) {
-      window.API.enableDemoMode();
-      window.App.showToast("Interactive Demo Mode Activated", "info");
-      await window.App.loadUserSession();
-      window.App.showScreen("homeScreen");
-    } finally {
-      window.App.showLoading(false);
-    }
   }
 }
 

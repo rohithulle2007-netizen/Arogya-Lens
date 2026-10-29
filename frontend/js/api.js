@@ -85,7 +85,7 @@ class ApiClient {
   }
 
   isDemoMode() {
-    return localStorage.getItem("arogya_demo_mode") === "true";
+    return window.__DEV_MODE__ === true && localStorage.getItem("arogya_demo_mode") === "true";
   }
 
   enableDemoMode() {
@@ -124,7 +124,7 @@ class ApiClient {
 
   async request(endpoint, options = {}) {
     if (!this.baseUrl && !this.isDemoMode()) {
-      throw new Error("No backend API configured. Please connect to a server or launch Demo Mode.");
+      throw new Error("No backend API configured. Please verify server connection.");
     }
 
     const url = `${this.baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
@@ -145,15 +145,6 @@ class ApiClient {
         headers
       });
 
-      if (response.status === 401) {
-        this.clearToken();
-        if (window.App && typeof window.App.showScreen === 'function') {
-          window.App.showToast("Session expired. Please log in again.", "error");
-          window.App.showScreen("loginScreen");
-        }
-        throw new Error("Unauthorized");
-      }
-
       let data = {};
       try {
         data = await response.json();
@@ -170,14 +161,29 @@ class ApiClient {
             errorMsg = `Server error (${response.status}): ${response.statusText || "Request failed"}`;
           }
         }
-        throw new Error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+
+        // Only redirect to login on 401 if it's a protected endpoint, NOT during auth/OTP verification
+        const isAuthEndpoint =
+          endpoint.includes("/api/auth/send-otp") ||
+          endpoint.includes("/api/auth/verify-otp") ||
+          endpoint.includes("/api/auth/register");
+
+        if (response.status === 401 && !isAuthEndpoint) {
+          this.clearToken();
+          if (window.App && typeof window.App.showScreen === "function") {
+            window.App.showToast("Session expired. Please log in again.", "info");
+            window.App.showScreen("loginScreen");
+          }
+        }
+
+        throw new Error(typeof errorMsg === "string" ? errorMsg : JSON.stringify(errorMsg));
       }
 
       return data;
     } catch (err) {
       console.error(`API Error [${endpoint}]:`, err);
       if (err.message === "Failed to fetch" || (err.name === "TypeError" && !err.message)) {
-        throw new Error("Unable to connect to backend server. Please verify your backend URL or click 'Instant Demo Mode'.");
+        throw new Error("Unable to connect to Arogya Lens API server. Please check your network connection and verify that the backend service is running.");
       }
       throw err;
     }

@@ -31,12 +31,11 @@
   <div class="app-container">
     <!-- Top Header -->
     <header class="app-header">
-      <div class="header-brand">
+      <div class="header-brand" id="headerBrandLogo" style="cursor: pointer;" title="Arogya Lens Home">
         <div class="header-logo">A</div>
         <span class="header-title" data-i18n="app_title">Arogya Lens</span>
       </div>
       <div style="display: flex; gap: 8px; align-items: center;">
-        <button id="serverConfigBtn" class="lang-toggle-btn" type="button" title="Configure Backend API Server" style="font-size: 0.78rem;">🌐 API</button>
         <button id="langToggleBtn" class="lang-toggle-btn" type="button">हिन्दी</button>
       </div>
     </header>
@@ -71,12 +70,18 @@
         <div style="display: flex; flex-direction: column; gap: 12px;">
           <button id="getStartedBtn" class="btn btn-primary" data-i18n="register">Register as New Patient</button>
           <button id="onboardingLoginBtn" class="btn btn-secondary" data-i18n="login">Log In with Mobile OTP</button>
-          <button id="quickDemoBtn" type="button" class="btn btn-secondary" style="background: var(--primary-teal-surface); color: var(--primary-teal-dark); border-color: rgba(13,148,136,0.3);">⚡ Instant Demo Mode (1-Click)</button>
         </div>
       </section>
 
       <!-- 2. Registration Screen -->
       <section id="registerScreen" class="screen-view">
+        <div style="margin-bottom: 12px;">
+          <button type="button" id="regBackHomeBtn" style="background: none; border: none; color: var(--primary-teal); font-size: 0.88rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span>Back to Home</span>
+          </button>
+        </div>
+
         <h2 class="section-title" data-i18n="register">Patient Registration</h2>
         <p class="section-subtitle">Create your screening profile for accurate AI adjustments</p>
 
@@ -117,6 +122,13 @@
 
       <!-- 3. Login Screen -->
       <section id="loginScreen" class="screen-view">
+        <div style="margin-bottom: 12px;">
+          <button type="button" id="loginBackHomeBtn" style="background: none; border: none; color: var(--primary-teal); font-size: 0.88rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span>Back to Home</span>
+          </button>
+        </div>
+
         <h2 class="section-title" data-i18n="login">Patient Login</h2>
         <p class="section-subtitle">Enter registered mobile number for OTP verification</p>
 
@@ -179,14 +191,17 @@
         </button>
 
         <!-- Resend & Change Actions -->
-        <div style="text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 16px; align-items: center;">
-          <button id="resendOtpBtn" type="button" style="background: none; border: none; color: var(--text-muted); font-size: 0.85rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" disabled>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
-            <span data-i18n="resend_otp">Resend Code</span>
-            <span id="otpCountdownTimer" style="font-weight: 600; color: var(--accent-rose);">(30s)</span>
-          </button>
-          <span style="color: var(--border-light);">|</span>
-          <button id="otpBackBtn" type="button" style="background: none; border: none; color: var(--primary-teal); font-size: 0.85rem; font-weight: 600; cursor: pointer;">Change mobile number</button>
+        <div style="text-align: center; margin-top: 20px; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+          <div style="display: flex; justify-content: center; gap: 16px; align-items: center;">
+            <button id="resendOtpBtn" type="button" style="background: none; border: none; color: var(--text-muted); font-size: 0.85rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" disabled>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              <span data-i18n="resend_otp">Resend Code</span>
+              <span id="otpCountdownTimer" style="font-weight: 600; color: var(--accent-rose);">(30s)</span>
+            </button>
+            <span style="color: var(--border-light);">|</span>
+            <button id="otpBackBtn" type="button" style="background: none; border: none; color: var(--primary-teal); font-size: 0.85rem; font-weight: 600; cursor: pointer;">Change mobile number</button>
+          </div>
+          <button id="otpHomeBtn" type="button" style="background: none; border: none; color: var(--text-muted); font-size: 0.82rem; cursor: pointer;">← Return to Homepage</button>
         </div>
       </section>
 

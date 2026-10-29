@@ -1,5 +1,6 @@
 /**
  * Arogya Lens — Main Application Router & Coordinator
+ * SPA history navigation, route state preservation, and component coordinator
  */
 
 class Application {
@@ -9,7 +10,7 @@ class Application {
   }
 
   async init() {
-    // Initialize components
+    // Initialize component controllers
     window.I18N.updateDOM();
     window.Auth.init();
     window.Scanner.init();
@@ -18,19 +19,38 @@ class Application {
     window.Profile.init();
 
     this.bindGlobalEvents();
+    this.bindHistoryRouting();
 
-    // Check existing authentication session
+    // Check existing authentication session and route
     const token = window.API.getToken();
+    const routeScreen = this.getScreenFromRoute();
+
     if (token) {
       try {
         await this.loadUserSession();
-        this.showScreen("homeScreen");
+        const authedScreens = ["homeScreen", "dashboardScreen", "historyScreen", "profileScreen", "scannerScreen"];
+        const target = routeScreen && authedScreens.includes(routeScreen) ? routeScreen : "homeScreen";
+        this.showScreen(target, false);
+        window.history.replaceState({ screenId: target }, "", target === "onboardingScreen" ? window.location.pathname : `#${target}`);
       } catch (e) {
-        this.showScreen("onboardingScreen");
+        window.API.clearToken();
+        const guestScreens = ["registerScreen", "loginScreen"];
+        const target = routeScreen && guestScreens.includes(routeScreen) ? routeScreen : "onboardingScreen";
+        this.showScreen(target, false);
+        window.history.replaceState({ screenId: target }, "", target === "onboardingScreen" ? window.location.pathname : `#${target}`);
       }
     } else {
-      this.showScreen("onboardingScreen");
+      const guestScreens = ["registerScreen", "loginScreen", "otpScreen"];
+      const target = routeScreen && guestScreens.includes(routeScreen) ? routeScreen : "onboardingScreen";
+      this.showScreen(target, false);
+      window.history.replaceState({ screenId: target }, "", target === "onboardingScreen" ? window.location.pathname : `#${target}`);
     }
+
+    // Expose developer console helper (not in public UI)
+    window.__arogyaSetApiUrl = (url) => {
+      window.API.setBaseUrl(url);
+      console.log(`[Arogya Lens Dev] Backend API set to: ${url}`);
+    };
   }
 
   bindGlobalEvents() {
@@ -39,23 +59,10 @@ class Application {
       window.I18N.toggleLanguage();
     });
 
-    // Server API Configuration
-    document.getElementById("serverConfigBtn")?.addEventListener("click", () => {
-      const currentUrl = window.API.baseUrl || "";
-      const promptVal = prompt(
-        "Arogya Lens Backend Server URL:\n\nEnter your deployed FastAPI server URL (e.g. https://your-backend.railway.app, https://arogya-lens.onrender.com, or http://127.0.0.1:8000).\nLeave blank to use Interactive Demo Mode:",
-        currentUrl
-      );
-      if (promptVal !== null) {
-        const cleanUrl = promptVal.trim().replace(/\/+$/, "");
-        window.API.setBaseUrl(cleanUrl);
-        if (cleanUrl) {
-          window.API.disableDemoMode();
-          this.showToast(`Backend API set to: ${cleanUrl}`, "success");
-        } else {
-          this.showToast("Using Interactive Demo Mode (Client-side)", "info");
-        }
-      }
+    // Top Header Brand Logo -> Return Home
+    document.getElementById("headerBrandLogo")?.addEventListener("click", () => {
+      const token = window.API.getToken();
+      this.showScreen(token ? "homeScreen" : "onboardingScreen");
     });
 
     // Onboarding Navigation
@@ -71,14 +78,21 @@ class Application {
       this.showScreen("loginScreen");
     });
 
-    document.getElementById("quickDemoBtn")?.addEventListener("click", async () => {
-      if (window.Auth && typeof window.Auth.demoLogin === "function") {
-        await window.Auth.demoLogin();
-      }
+    // Back to Home Navigation buttons
+    document.getElementById("loginBackHomeBtn")?.addEventListener("click", () => {
+      this.showScreen("onboardingScreen");
+    });
+
+    document.getElementById("regBackHomeBtn")?.addEventListener("click", () => {
+      this.showScreen("onboardingScreen");
+    });
+
+    document.getElementById("otpHomeBtn")?.addEventListener("click", () => {
+      this.showScreen("onboardingScreen");
     });
 
     // Bottom Navigation Bar Routing
-    document.querySelectorAll(".nav-item[data-target]").forEach(btn => {
+    document.querySelectorAll(".nav-item[data-target]").forEach((btn) => {
       btn.addEventListener("click", async (e) => {
         e.preventDefault();
         const target = btn.getAttribute("data-target");
@@ -95,6 +109,59 @@ class Application {
     });
   }
 
+  bindHistoryRouting() {
+    window.addEventListener("popstate", (e) => {
+      const screenId =
+        e.state?.screenId ||
+        this.getScreenFromRoute() ||
+        (window.API.getToken() ? "homeScreen" : "onboardingScreen");
+      this.showScreen(screenId, false);
+    });
+  }
+
+  getScreenFromRoute() {
+    const hash = (window.location.hash || "").replace(/^#/, "").trim();
+    if (hash) {
+      if (document.getElementById(hash)) {
+        return hash;
+      }
+      const aliases = {
+        login: "loginScreen",
+        register: "registerScreen",
+        signup: "registerScreen",
+        otp: "otpScreen",
+        home: "homeScreen",
+        dashboard: "dashboardScreen",
+        scanner: "scannerScreen",
+        history: "historyScreen",
+        profile: "profileScreen",
+        onboarding: "onboardingScreen",
+      };
+      if (aliases[hash]) {
+        return aliases[hash];
+      }
+    }
+
+    const segments = window.location.pathname.split("/").filter(Boolean);
+    const lastSegment = segments.pop() || "";
+    const pathAliases = {
+      login: "loginScreen",
+      register: "registerScreen",
+      signup: "registerScreen",
+      otp: "otpScreen",
+      home: "homeScreen",
+      dashboard: "dashboardScreen",
+      scanner: "scannerScreen",
+      history: "historyScreen",
+      profile: "profileScreen",
+    };
+    if (pathAliases[lastSegment]) {
+      return pathAliases[lastSegment];
+    }
+
+    return null;
+  }
+
   async loadUserSession() {
     this.userProfile = await window.API.getProfile();
     const greetName = document.getElementById("userGreetingName");
@@ -103,17 +170,31 @@ class Application {
     }
   }
 
-  showScreen(screenId) {
+  showScreen(screenId, pushHistory = true) {
     // Stop camera when moving away from scanner view
     if (this.currentScreenId === "scannerScreen" && screenId !== "scannerScreen") {
-      window.Camera.stopCamera();
+      window.Camera?.stopCamera();
     }
 
-    document.querySelectorAll(".screen-view").forEach(s => s.classList.remove("active"));
-    const target = document.getElementById(screenId);
+    let target = document.getElementById(screenId);
+    if (!target) {
+      screenId = "onboardingScreen";
+      target = document.getElementById(screenId);
+    }
+
+    document.querySelectorAll(".screen-view").forEach((s) => s.classList.remove("active"));
     if (target) {
       target.classList.add("active");
       this.currentScreenId = screenId;
+    }
+
+    // Push history state to enable smooth Back / Forward navigation without exiting app
+    if (pushHistory && window.history) {
+      const hash = screenId === "onboardingScreen" ? "" : `#${screenId}`;
+      const url = hash ? `${window.location.pathname}${hash}` : window.location.pathname;
+      if (window.location.hash !== hash) {
+        window.history.pushState({ screenId }, "", url);
+      }
     }
 
     // Manage bottom navigation active states & visibility
@@ -123,7 +204,7 @@ class Application {
     if (bottomNav) {
       if (authedScreens.includes(screenId)) {
         bottomNav.style.display = "flex";
-        document.querySelectorAll(".nav-item").forEach(item => {
+        document.querySelectorAll(".nav-item").forEach((item) => {
           if (item.getAttribute("data-target") === screenId) {
             item.classList.add("active");
           } else {
@@ -134,6 +215,8 @@ class Application {
         bottomNav.style.display = "none";
       }
     }
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   showToast(message, type = "info") {
@@ -161,7 +244,3 @@ class Application {
 }
 
 window.App = new Application();
-
-document.addEventListener("DOMContentLoaded", () => {
-  window.App.init();
-});

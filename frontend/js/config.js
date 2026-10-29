@@ -4,15 +4,25 @@
  */
 
 const getApiBaseUrl = () => {
+  // Helper to sanitize and normalize URLs
+  const cleanUrl = (raw) => {
+    if (!raw || typeof raw !== 'string') return '';
+    let url = raw.trim().replace(/\/+$/, '');
+    if (window.location.protocol === 'https:' && url.startsWith('http://') && !url.includes('localhost') && !url.includes('127.0.0.1')) {
+      url = url.replace(/^http:\/\//, 'https://');
+    }
+    return url;
+  };
+
   // 1. Explicit build-time URL (e.g. from GitHub Actions / Vite define)
   if (typeof window.__API_BASE_URL__ === 'string' && window.__API_BASE_URL__.trim()) {
-    return window.__API_BASE_URL__.trim();
+    return cleanUrl(window.__API_BASE_URL__);
   }
 
   // 2. Custom URL explicitly set by user in localStorage
   const storedUrl = localStorage.getItem('arogya_api_base_url');
   if (storedUrl && storedUrl.trim()) {
-    return storedUrl.trim();
+    return cleanUrl(storedUrl);
   }
 
   const hostname = window.location.hostname || '127.0.0.1';

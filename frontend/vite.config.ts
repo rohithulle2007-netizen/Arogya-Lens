@@ -18,18 +18,30 @@ function copyStaticPlugin(): Plugin {
 
       // Inject build-time API base URL into dist/js/config.js if provided
       const configDistPath = path.join(distDir, 'js', 'config.js');
+      let apiUrl = (process.env.VITE_API_BASE_URL || '').trim().replace(/\/+$/, '');
+      if (apiUrl.startsWith('http://') && !apiUrl.includes('localhost') && !apiUrl.includes('127.0.0.1')) {
+        apiUrl = apiUrl.replace(/^http:\/\//, 'https://');
+      }
+
       if (fs.existsSync(configDistPath)) {
-        const apiUrl = process.env.VITE_API_BASE_URL || '';
         let content = fs.readFileSync(configDistPath, 'utf8');
         content = `window.__API_BASE_URL__ = ${JSON.stringify(apiUrl)};\n` + content;
         fs.writeFileSync(configDistPath, content, 'utf8');
       }
 
-      // Ensure .nojekyll and 404.html exist for seamless GitHub Pages deployment & SPA refresh
+      // Ensure .nojekyll, 404.html, and inline base URL exist for GitHub Pages SPA deployment
       if (fs.existsSync(distDir)) {
         fs.writeFileSync(path.join(distDir, '.nojekyll'), '');
         const indexHtml = path.join(distDir, 'index.html');
         if (fs.existsSync(indexHtml)) {
+          let html = fs.readFileSync(indexHtml, 'utf8');
+          if (apiUrl && !html.includes('window.__API_BASE_URL__')) {
+            html = html.replace(
+              '<script src="js/config.js"></script>',
+              `<script>window.__API_BASE_URL__ = ${JSON.stringify(apiUrl)};</script>\n  <script src="js/config.js"></script>`
+            );
+            fs.writeFileSync(indexHtml, html, 'utf8');
+          }
           fs.copyFileSync(indexHtml, path.join(distDir, '404.html'));
         }
       }
