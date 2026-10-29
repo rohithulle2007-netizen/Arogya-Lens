@@ -9,6 +9,7 @@ const SEED_DEMO_HISTORY = [
     estimated_hb: 12.4,
     confidence: 0.94,
     status: "likely_normal",
+    is_demo: true,
     image_quality: "good",
     checkup_date: new Date(Date.now() - 3 * 86400000).toISOString().split('T')[0],
     checkup_time: "10:30 AM",
@@ -28,6 +29,7 @@ const SEED_DEMO_HISTORY = [
     estimated_hb: 12.0,
     confidence: 0.91,
     status: "likely_normal",
+    is_demo: true,
     image_quality: "good",
     checkup_date: new Date(Date.now() - 16 * 86400000).toISOString().split('T')[0],
     checkup_time: "02:15 PM",
@@ -47,6 +49,7 @@ const SEED_DEMO_HISTORY = [
     estimated_hb: 11.5,
     confidence: 0.88,
     status: "possible_anemia",
+    is_demo: true,
     image_quality: "good",
     checkup_date: new Date(Date.now() - 32 * 86400000).toISOString().split('T')[0],
     checkup_time: "11:45 AM",
@@ -90,7 +93,7 @@ class ApiClient {
     this.setToken("demo_jwt_token_priya_sharma");
     if (!localStorage.getItem(this.demoUserKey)) {
       localStorage.setItem(this.demoUserKey, JSON.stringify({
-        name: "Priya Sharma",
+        name: "Priya Sharma (Demo Profile)",
         mobile_number: "9876543210",
         age: 28,
         sex: "female"
@@ -184,7 +187,14 @@ class ApiClient {
   async register(payload) {
     if (this.isDemoMode()) {
       localStorage.setItem(this.demoUserKey, JSON.stringify(payload));
-      return { message: "Demo registration successful", access_token: "demo_jwt_token_priya_sharma", token_type: "bearer" };
+      return {
+        message: "Demo registration successful",
+        delivery_mode: "mock",
+        dev_otp: "123456",
+        cooldown_seconds: 30,
+        access_token: "demo_jwt_token_priya_sharma",
+        token_type: "bearer"
+      };
     }
     return this.request("/api/auth/register", {
       method: "POST",
@@ -194,7 +204,12 @@ class ApiClient {
 
   async sendOtp(mobileNumber) {
     if (this.isDemoMode()) {
-      return { message: "Demo OTP sent (Code: 123456)", demo_otp: "123456" };
+      return {
+        message: "Demo OTP ready",
+        delivery_mode: "mock",
+        dev_otp: "123456",
+        cooldown_seconds: 30
+      };
     }
     return this.request("/api/auth/send-otp", {
       method: "POST",
@@ -269,6 +284,7 @@ class ApiClient {
         estimated_hb: simulatedHb,
         confidence: simulatedConf,
         status: status,
+        is_demo: true,
         image_quality: "good",
         checkup_date: new Date().toISOString().split('T')[0],
         checkup_time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),

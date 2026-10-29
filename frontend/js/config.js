@@ -4,25 +4,33 @@
  */
 
 const getApiBaseUrl = () => {
-  if (window.__API_BASE_URL__) return window.__API_BASE_URL__;
+  // 1. Explicit build-time URL (e.g. from GitHub Actions / Vite define)
+  if (typeof window.__API_BASE_URL__ === 'string' && window.__API_BASE_URL__.trim()) {
+    return window.__API_BASE_URL__.trim();
+  }
+
+  // 2. Custom URL explicitly set by user in localStorage
   const storedUrl = localStorage.getItem('arogya_api_base_url');
-  if (storedUrl) return storedUrl;
+  if (storedUrl && storedUrl.trim()) {
+    return storedUrl.trim();
+  }
 
   const hostname = window.location.hostname || '127.0.0.1';
-  // If backend is serving frontend directly on port 8000
-  if (window.location.port === '8000') {
-    return window.location.origin;
-  }
-  // If hosted on GitHub Pages and no custom backend URL is stored
+
+  // 3. GitHub Pages: Default to empty string for standalone offline demo mode
   if (hostname.endsWith('github.io')) {
     return '';
   }
-  // If running locally
-  if (hostname === 'localhost' || hostname === '127.0.0.1') {
-    return `http://${hostname}:8000`;
+
+  // 4. Local development or container environments:
+  // - If running under Vite dev server (port 5173 / 5174), Vite proxies /api to port 8000.
+  // - If running directly on FastAPI backend (port 8000), origin is http://127.0.0.1:8000.
+  // Using window.location.origin guarantees same-origin proxy compatibility and zero CORS issues.
+  if (window.location.origin && window.location.origin !== 'null') {
+    return window.location.origin;
   }
-  // Default to origin or port 8000
-  return window.location.origin;
+
+  return 'http://127.0.0.1:8000';
 };
 
 const CONFIG = {

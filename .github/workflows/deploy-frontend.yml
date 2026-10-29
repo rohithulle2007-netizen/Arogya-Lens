@@ -1,29 +1,40 @@
-name: Deploy Arogya Lens to GitHub Pages
+name: Deploy Arogya Lens Frontend to GitHub Pages
 
 on:
   push:
     branches:
       - main
-      - master
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/deploy-frontend.yml'
   workflow_dispatch:
+    inputs:
+      api_base_url:
+        description: 'Optional Production Backend API URL (leave blank for built-in Demo Mode)'
+        required: false
+        default: ''
+        type: string
 
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# Allow one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
   build:
+    name: Build Frontend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
+      - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -34,16 +45,38 @@ jobs:
         working-directory: frontend
         run: npm ci
 
-      - name: Build Web Application
+      - name: Build Frontend Application
         working-directory: frontend
+        env:
+          # Production backend API URL configured via repository variable (vars) or manual dispatch input (never secrets)
+          VITE_API_BASE_URL: ${{ inputs.api_base_url || vars.VITE_API_BASE_URL || '' }}
+          # Relative base path ensures assets load cleanly at https://USERNAME.github.io/REPOSITORY/
+          VITE_BASE_PATH: './'
         run: npm run build
+
+      - name: Security and Isolation Audit
+        run: |
+          echo "Auditing frontend build distribution artifacts..."
+          test -f frontend/dist/index.html || (echo "ERROR: Missing dist/index.html" && exit 1)
+          test -f frontend/dist/404.html || (echo "ERROR: Missing dist/404.html" && exit 1)
+          test -d frontend/dist/js || (echo "ERROR: Missing dist/js directory" && exit 1)
+          test -f frontend/dist/.nojekyll || (echo "ERROR: Missing dist/.nojekyll" && exit 1)
+
+          # Verify no backend, ml, uploads, databases, or .env files are in the artifact
+          if [ -d "frontend/dist/backend" ] || [ -d "frontend/dist/ml" ] || [ -d "frontend/dist/uploads" ] || [ -f "frontend/dist/arogya_lens.db" ] || [ -f "frontend/dist/.env" ]; then
+            echo "SECURITY VIOLATION: Sensitive backend or database files detected in frontend distribution bundle!"
+            exit 1
+          fi
+          echo "Security audit passed: Artifact strictly contains isolated frontend distribution files."
 
       - name: Upload Pages Artifact
         uses: actions/upload-pages-artifact@v3
         with:
+          # STRICT: Upload ONLY the generated frontend/dist directory, never root '.'
           path: frontend/dist
 
   deploy:
+    name: Deploy to GitHub Pages
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

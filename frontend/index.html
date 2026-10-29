@@ -136,26 +136,57 @@
 
       <!-- 4. OTP Verification Screen -->
       <section id="otpScreen" class="screen-view">
-        <h2 class="section-title" data-i18n="verify_otp">Verify Mobile</h2>
-        <p class="section-subtitle"><span data-i18n="otp_subtext">Code sent to</span> <strong id="otpSentMobile">+91 ...</strong></p>
-
-        <div style="display: flex; justify-content: space-between; gap: 8px; margin: 24px 0;">
-          <input type="text" class="form-input otp-digit-input" maxlength="1" style="text-align: center; font-size: 1.4rem; font-weight: 700; height: 54px;" autofocus>
-          <input type="text" class="form-input otp-digit-input" maxlength="1" style="text-align: center; font-size: 1.4rem; font-weight: 700; height: 54px;">
-          <input type="text" class="form-input otp-digit-input" maxlength="1" style="text-align: center; font-size: 1.4rem; font-weight: 700; height: 54px;">
-          <input type="text" class="form-input otp-digit-input" maxlength="1" style="text-align: center; font-size: 1.4rem; font-weight: 700; height: 54px;">
-          <input type="text" class="form-input otp-digit-input" maxlength="1" style="text-align: center; font-size: 1.4rem; font-weight: 700; height: 54px;">
-          <input type="text" class="form-input otp-digit-input" maxlength="1" style="text-align: center; font-size: 1.4rem; font-weight: 700; height: 54px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <h2 class="section-title" id="otpScreenTitle" style="margin-bottom: 0;" data-i18n="verify_otp">Verify Mobile</h2>
+          <span id="otpModeBadge" class="badge badge-normal" style="font-size: 0.72rem; text-transform: uppercase;">Login</span>
         </div>
 
-        <button id="verifyOtpBtn" class="btn btn-primary" data-i18n="verify_btn">Verify & Continue</button>
+        <p class="section-subtitle" style="margin-bottom: 14px;">
+          Enter the 6-digit code for
+          <strong id="otpSentMobile" style="color: var(--primary-teal-dark); font-family: monospace; font-size: 0.95rem; letter-spacing: 1px;">+91 ******0000</strong>
+          <button id="changeMobileBtn" type="button" style="background: none; border: none; color: var(--primary-teal); font-size: 0.82rem; font-weight: 600; text-decoration: underline; cursor: pointer; margin-left: 6px;">Change</button>
+        </p>
 
+        <!-- Development / Test OTP Banner (Displayed only when SMS provider not active) -->
+        <div id="devOtpCard" class="dev-otp-card" style="display: none;">
+          <div class="dev-otp-badge-row">
+            <span class="badge badge-warning" style="font-size: 0.7rem; padding: 2px 8px;">Development Test Mode</span>
+            <span class="dev-otp-note">SMS provider not configured</span>
+          </div>
+          <div class="dev-otp-action-row">
+            <span>Test OTP: <strong id="devOtpCodeDisplay" class="dev-otp-code">123456</strong></span>
+            <button type="button" id="autoFillOtpBtn" class="btn-tag">Auto-Fill</button>
+          </div>
+        </div>
+
+        <!-- Inline Status/Error Feedback -->
+        <div id="otpAlertBox" class="otp-alert-box" style="display: none;"></div>
+
+        <!-- 6 Separate OTP Input Boxes with automatic focus progression & paste support -->
+        <div class="otp-inputs-row" id="otpInputsContainer">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="form-input otp-digit-input" data-index="0" autofocus>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="form-input otp-digit-input" data-index="1">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="form-input otp-digit-input" data-index="2">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="form-input otp-digit-input" data-index="3">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="form-input otp-digit-input" data-index="4">
+          <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" autocomplete="one-time-code" class="form-input otp-digit-input" data-index="5">
+        </div>
+
+        <!-- Verify OTP Button -->
+        <button id="verifyOtpBtn" type="button" class="btn btn-primary" style="margin-top: 10px;">
+          <span id="verifyBtnSpinner" style="display: none; width: 16px; height: 16px; border: 2px solid #ffffff; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px;"></span>
+          <span id="verifyBtnText" data-i18n="verify_btn">Verify OTP & Continue</span>
+        </button>
+
+        <!-- Resend & Change Actions -->
         <div style="text-align: center; margin-top: 20px; display: flex; justify-content: center; gap: 16px; align-items: center;">
-          <button id="resendOtpBtn" type="button" style="background: none; border: none; color: var(--text-muted); font-size: 0.85rem; cursor: pointer;">
-            <span data-i18n="resend_otp">Resend Code</span> <span id="otpTimer"></span>
+          <button id="resendOtpBtn" type="button" style="background: none; border: none; color: var(--text-muted); font-size: 0.85rem; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;" disabled>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            <span data-i18n="resend_otp">Resend Code</span>
+            <span id="otpCountdownTimer" style="font-weight: 600; color: var(--accent-rose);">(30s)</span>
           </button>
           <span style="color: var(--border-light);">|</span>
-          <button id="otpBackBtn" type="button" style="background: none; border: none; color: var(--primary-teal); font-size: 0.85rem; cursor: pointer;">Back to Login</button>
+          <button id="otpBackBtn" type="button" style="background: none; border: none; color: var(--primary-teal); font-size: 0.85rem; font-weight: 600; cursor: pointer;">Change mobile number</button>
         </div>
       </section>
 
@@ -324,6 +355,10 @@
       <section id="resultScreen" class="screen-view">
         <h2 class="section-title" data-i18n="results_title">Screening Assessment</h2>
         <p class="section-subtitle">Estimated Hemoglobin & Multi-Site Biomarker Guidance</p>
+
+        <div id="demoResultBanner" style="display:none; background:#fef3c7; border: 1px solid #f59e0b; color:#92400e; padding:8px 12px; border-radius: var(--radius-sm); font-size: 0.8rem; font-weight: 600; text-align: center; margin-bottom: 14px;">
+          ⚡ DEMO MODE: Simulated Screening Result (Not a clinical measurement)
+        </div>
 
         <div class="result-hero-card">
           <span style="font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em;" data-i18n="estimated_hb">Estimated Hb</span>

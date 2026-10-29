@@ -67,6 +67,12 @@ class ScreeningManager {
     this.updateSiteBadge("statLeftThumb", sites.left_thumb || { quality: "good" }, "Nail Bed");
     this.updateSiteBadge("statRightThumb", sites.right_thumb || { quality: "good" }, "Nail Bed");
 
+    // Display Simulated Demo Banner if in Demo Mode
+    const demoBanner = document.getElementById("demoResultBanner");
+    if (demoBanner) {
+      demoBanner.style.display = (data.is_demo || window.API?.isDemoMode()) ? "block" : "none";
+    }
+
     window.App.showScreen("resultScreen");
   }
 
