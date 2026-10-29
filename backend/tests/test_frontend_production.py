@@ -85,8 +85,8 @@ def test_production_build_injection_of_valid_https_url():
     """Verify Vite build correctly injects valid HTTPS API URL into config.js and index.html."""
     import shutil
     import pytest
-    if not shutil.which("npm"):
-        pytest.skip("npm is not installed in this environment (e.g. backend-only CI job)")
+    if not shutil.which("npm") or not (FRONTEND_DIR / "node_modules").exists():
+        pytest.skip("npm or frontend/node_modules is not installed (e.g. backend-only CI job)")
 
     test_url = "https://verified-backend.up.railway.app"
     cmd = f"VITE_API_BASE_URL='{test_url}' npm run build"
