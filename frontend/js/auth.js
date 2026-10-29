@@ -87,16 +87,16 @@ class AuthManager {
         this.openOtpScreen({ mobile, mode: "login", response: res });
       } catch (err) {
         const msg = err.message || "Failed to send OTP";
-        if (msg.includes("No backend API")) {
-          const exp = "Arogya Lens backend server is not connected. To enable live login, deploy the FastAPI backend or configure VITE_API_BASE_URL.";
-          this.showLoginAlert(exp, "error");
-          window.App.showToast("Backend server unavailable", "error");
+        if (err.isMissingApiUrl || msg.includes("No backend API configured")) {
+          this.showConnectionHelper("login");
+          window.App.showToast("Backend server not connected", "warning");
           return;
         }
-        if (msg.includes("Unable to connect")) {
-          const exp = "Unable to connect to Arogya Lens API server. Please check your internet connection or verify the backend service is running.";
-          this.showLoginAlert(exp, "error");
-          window.App.showToast("Cannot reach server", "error");
+        if (err.isRenderWakingUp || msg.includes("waking up") || msg.includes("starting up")) {
+          this.showWakeupNotice("login", () => {
+            document.getElementById("loginForm")?.dispatchEvent(new Event("submit", { cancelable: true }));
+          });
+          window.App.showToast("Server waking up on Render...", "info");
           return;
         }
         if (
@@ -189,16 +189,16 @@ class AuthManager {
         this.openOtpScreen({ mobile, mode: "register", response: res });
       } catch (err) {
         const msg = err.message || "Registration failed";
-        if (msg.includes("No backend API")) {
-          const exp = "Arogya Lens backend server is not connected. To register, deploy the FastAPI backend or configure VITE_API_BASE_URL.";
-          this.showRegAlert(exp, "error");
-          window.App.showToast("Backend server unavailable", "error");
+        if (err.isMissingApiUrl || msg.includes("No backend API configured")) {
+          this.showConnectionHelper("register");
+          window.App.showToast("Backend server not connected", "warning");
           return;
         }
-        if (msg.includes("Unable to connect")) {
-          const exp = "Unable to connect to Arogya Lens API server. Please check your internet connection or verify the backend service is running.";
-          this.showRegAlert(exp, "error");
-          window.App.showToast("Cannot reach server", "error");
+        if (err.isRenderWakingUp || msg.includes("waking up") || msg.includes("starting up")) {
+          this.showWakeupNotice("register", () => {
+            document.getElementById("registerForm")?.dispatchEvent(new Event("submit", { cancelable: true }));
+          });
+          window.App.showToast("Server waking up on Render...", "info");
           return;
         }
         if (msg.toLowerCase().includes("already registered")) {
@@ -536,6 +536,130 @@ class AuthManager {
     alertBox.textContent = message;
     alertBox.className = `otp-alert-box ${type}`;
     alertBox.style.display = "block";
+  }
+
+  showConnectionHelper(screenType = "login") {
+    const alertBox = document.getElementById(screenType === "login" ? "loginAlertBox" : "regAlertBox");
+    if (!alertBox) return;
+
+    alertBox.innerHTML = `
+      <div style="font-weight: 700; margin-bottom: 6px; font-size: 0.88rem; color: #92400e; display: flex; align-items: center; gap: 6px;">
+        <span>🔌</span> FastAPI Backend Connection Required
+      </div>
+      <p style="font-size: 0.8rem; margin-bottom: 8px; line-height: 1.4; color: #78350f;">
+        The frontend cannot register or log in without connecting to your deployed FastAPI backend server on Render.
+      </p>
+      <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+        <input type="url" id="manualConnectInput_${screenType}" class="form-input" style="font-size: 0.82rem; padding: 6px 10px; flex: 1; background: #ffffff;" placeholder="https://your-service.onrender.com" value="${window.API?.baseUrl || ''}">
+        <button type="button" id="manualConnectBtn_${screenType}" class="btn btn-primary" style="white-space: nowrap; padding: 6px 12px; font-size: 0.8rem;">Connect Server</button>
+      </div>
+      <div id="manualConnectStatus_${screenType}" style="display: none; font-size: 0.78rem; margin-bottom: 6px; font-weight: 600;"></div>
+      <p style="font-size: 0.73rem; color: var(--text-muted); margin: 0; line-height: 1.35;">
+        💡 <em>To permanently wire your backend for all visitors, set <code>VITE_API_BASE_URL</code> in GitHub Repository Settings &rarr; Secrets and variables &rarr; Actions &rarr; Variables.</em>
+      </p>
+    `;
+    alertBox.className = "otp-alert-box warning";
+    alertBox.style.display = "block";
+
+    const btn = document.getElementById(`manualConnectBtn_${screenType}`);
+    const input = document.getElementById(`manualConnectInput_${screenType}`);
+    const statusEl = document.getElementById(`manualConnectStatus_${screenType}`);
+
+    btn?.addEventListener("click", async () => {
+      let url = input?.value?.trim().replace(/\/+$/, "") || "";
+      if (!url) {
+        if (statusEl) {
+          statusEl.style.display = "block";
+          statusEl.style.color = "var(--status-danger)";
+          statusEl.textContent = "Please enter your Render HTTPS backend URL.";
+        }
+        return;
+      }
+      if (!url.startsWith("https://") && !url.includes("localhost") && !url.includes("127.0.0.1")) {
+        url = "https://" + url;
+        if (input) input.value = url;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Connecting...";
+      if (statusEl) {
+        statusEl.style.display = "block";
+        statusEl.style.color = "var(--primary-teal-dark)";
+        statusEl.textContent = "Checking /api/health...";
+      }
+
+      const health = await window.API.checkHealth(url);
+      if (health.ok) {
+        window.API.setBaseUrl(url);
+        if (statusEl) {
+          statusEl.style.color = "var(--status-normal)";
+          statusEl.textContent = "✅ Connected to Arogya Lens API! Retrying request...";
+        }
+        window.App.showToast("Backend connected successfully!", "success");
+        setTimeout(() => {
+          alertBox.style.display = "none";
+          if (screenType === "login") {
+            document.getElementById("loginForm")?.dispatchEvent(new Event("submit", { cancelable: true }));
+          } else {
+            document.getElementById("registerForm")?.dispatchEvent(new Event("submit", { cancelable: true }));
+          }
+        }, 800);
+      } else {
+        btn.disabled = false;
+        btn.textContent = "Connect Server";
+        if (statusEl) {
+          statusEl.style.color = "var(--status-danger)";
+          statusEl.textContent = `❌ Could not reach ${url}/api/health. Please verify your Render service is running.`;
+        }
+      }
+    });
+  }
+
+  showWakeupNotice(screenType = "login", onRetryCallback) {
+    const alertBox = document.getElementById(screenType === "login" ? "loginAlertBox" : "regAlertBox");
+    if (!alertBox) return;
+
+    alertBox.innerHTML = `
+      <div style="font-weight: 700; margin-bottom: 6px; font-size: 0.88rem; color: #92400e; display: flex; align-items: center; gap: 6px;">
+        <span>⏳</span> Cloud Server is Waking Up
+      </div>
+      <p style="font-size: 0.8rem; margin-bottom: 8px; line-height: 1.4; color: #78350f;">
+        Render free-tier instances sleep after 15 minutes of inactivity and take 30–50 seconds to resume. Please wait a moment while the server starts.
+      </p>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button type="button" id="wakeupRetryBtn_${screenType}" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.8rem;">
+          Retry Connection
+        </button>
+        <span id="wakeupStatus_${screenType}" style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);"></span>
+      </div>
+    `;
+    alertBox.className = "otp-alert-box warning";
+    alertBox.style.display = "block";
+
+    const retryBtn = document.getElementById(`wakeupRetryBtn_${screenType}`);
+    const statusText = document.getElementById(`wakeupStatus_${screenType}`);
+
+    retryBtn?.addEventListener("click", async () => {
+      retryBtn.disabled = true;
+      retryBtn.textContent = "Pinging Server...";
+      if (statusText) statusText.textContent = "Checking /api/health...";
+
+      const health = await window.API.checkHealth();
+      if (health.ok) {
+        if (statusText) statusText.textContent = "Server is online!";
+        window.App.showToast("Server online! Retrying request...", "success");
+        setTimeout(() => {
+          alertBox.style.display = "none";
+          if (typeof onRetryCallback === "function") {
+            onRetryCallback();
+          }
+        }, 500);
+      } else {
+        retryBtn.disabled = false;
+        retryBtn.textContent = "Retry Connection";
+        if (statusText) statusText.textContent = "Still waking up... please wait a few seconds.";
+      }
+    });
   }
 
   clearErrors() {

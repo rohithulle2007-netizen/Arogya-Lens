@@ -122,9 +122,32 @@ class ApiClient {
     localStorage.removeItem("arogya_demo_mode");
   }
 
+  async checkHealth(targetUrl = null) {
+    const base = (targetUrl || this.baseUrl || "").replace(/\/+$/, "");
+    if (!base) return { ok: false, reason: "NO_URL" };
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const res = await fetch(`${base}/api/health`, {
+        signal: controller.signal,
+        headers: { "Accept": "application/json" }
+      });
+      clearTimeout(timeoutId);
+      if (res.ok) {
+        const data = await res.json();
+        return { ok: true, data };
+      }
+      return { ok: false, status: res.status, reason: res.statusText };
+    } catch (err) {
+      return { ok: false, error: err.message, reason: "NETWORK_ERROR" };
+    }
+  }
+
   async request(endpoint, options = {}) {
     if (!this.baseUrl && !this.isDemoMode()) {
-      throw new Error("No backend API configured. Please verify server connection.");
+      const err = new Error("No backend API configured. Please connect to a server or configure VITE_API_BASE_URL.");
+      err.isMissingApiUrl = true;
+      throw err;
     }
 
     const url = `${this.baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
@@ -154,9 +177,13 @@ class ApiClient {
 
       if (!response.ok) {
         let errorMsg = data.detail || data.message;
+        const isGatewayError = [502, 503, 504].includes(response.status) && !data.detail;
+
         if (!errorMsg) {
           if (response.status === 404) {
             errorMsg = "Account not found. Please register first.";
+          } else if (isGatewayError) {
+            errorMsg = "Backend server is starting up or temporarily unreachable on Render (cold start takes 30-50s). Please wait a moment and retry.";
           } else {
             errorMsg = `Server error (${response.status}): ${response.statusText || "Request failed"}`;
           }
@@ -176,14 +203,23 @@ class ApiClient {
           }
         }
 
-        throw new Error(typeof errorMsg === "string" ? errorMsg : JSON.stringify(errorMsg));
+        const errObj = new Error(typeof errorMsg === "string" ? errorMsg : JSON.stringify(errorMsg));
+        if (isGatewayError) {
+          errObj.isRenderWakingUp = true;
+        }
+        throw errObj;
       }
 
       return data;
     } catch (err) {
       console.error(`API Error [${endpoint}]:`, err);
+      if (err.isMissingApiUrl || err.isRenderWakingUp) {
+        throw err;
+      }
       if (err.message === "Failed to fetch" || (err.name === "TypeError" && !err.message)) {
-        throw new Error("Unable to connect to Arogya Lens API server. Please check your network connection and verify that the backend service is running.");
+        const wakeErr = new Error("Unable to connect to Arogya Lens API server. If the Render backend is waking up from sleep, free instances take 30–50s to cold-start. Please wait a moment and retry.");
+        wakeErr.isRenderWakingUp = true;
+        throw wakeErr;
       }
       throw err;
     }

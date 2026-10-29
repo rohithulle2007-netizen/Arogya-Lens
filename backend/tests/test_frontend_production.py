@@ -31,19 +31,19 @@ def test_home_navigation_elements_exist():
     assert "headerBrandLogo" in index_html, "Missing header brand logo navigation anchor"
 
 
-def test_workflow_validation_allows_standalone_when_api_url_empty():
-    """Verify workflow validation handles empty VITE_API_BASE_URL gracefully for public frontend deployment."""
+def test_workflow_validation_rejects_empty_api_url():
+    """Verify workflow validation halts with error on empty VITE_API_BASE_URL to prevent broken standalone builds."""
     validation_script = """
     API_URL=""
     API_URL=$(echo "$API_URL" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s:/*$::')
     if [ -z "$API_URL" ]; then
-      exit 0
-    else
       exit 1
+    else
+      exit 0
     fi
     """
     res = subprocess.run(["bash", "-c", validation_script], capture_output=True)
-    assert res.returncode == 0, "Expected empty API_URL to allow public frontend deployment"
+    assert res.returncode == 1, "Expected empty API_URL to fail validation"
 
 
 def test_workflow_validation_catches_insecure_http_url():
