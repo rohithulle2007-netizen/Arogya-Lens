@@ -8,6 +8,14 @@ from app.database.base import Base
 connect_args = {}
 if settings.DATABASE_URL.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
+    # Ensure parent directory exists for SQLite database file
+    db_file = settings.DATABASE_URL.replace("sqlite:///", "")
+    if db_file and not db_file.startswith(":memory:"):
+        from pathlib import Path
+        try:
+            Path(db_file).parent.mkdir(parents=True, exist_ok=True)
+        except Exception:
+            pass
 
 # Create SQLAlchemy engine
 engine = create_engine(

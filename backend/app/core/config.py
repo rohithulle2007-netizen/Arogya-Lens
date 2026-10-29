@@ -23,7 +23,7 @@ class Settings:
     APP_NAME: str = os.getenv("APP_NAME", "Arogya Lens API")
     APP_VERSION: str = os.getenv("APP_VERSION", "1.0.0")
     DATABASE_URL: str = os.getenv("DATABASE_URL", f"sqlite:///{PROJECT_ROOT / 'arogya_lens.db'}")
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "arogya_lens_secure_super_secret_jwt_key_2026_x9#k")
+    SECRET_KEY: str = os.getenv("SECRET_KEY") or os.getenv("JWT_SECRET_KEY") or "arogya_lens_secure_super_secret_jwt_key_2026_x9#k"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60"))
     OTP_EXPIRE_MINUTES: int = int(os.getenv("OTP_EXPIRE_MINUTES", "5"))
     UPLOAD_DIR: str = os.getenv("UPLOAD_DIR", str(PROJECT_ROOT / "uploads"))

@@ -34,8 +34,8 @@ COPY ml /app/ml
 COPY frontend /app/frontend
 COPY run.py /app/run.py
 
-# Create persistent uploads directory
-RUN mkdir -p /app/uploads /app/backend/uploads
+# Create persistent data and uploads directory
+RUN mkdir -p /app/uploads /app/backend/uploads /app/data
 
 # Expose server port
 EXPOSE 8000
