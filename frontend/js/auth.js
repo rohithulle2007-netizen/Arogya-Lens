@@ -89,14 +89,12 @@ class AuthManager {
         const msg = err.message || "Failed to send OTP";
         if (err.isMissingApiUrl || msg.includes("No backend API configured")) {
           this.showConnectionHelper("login");
-          window.App.showToast("Backend server not connected", "warning");
           return;
         }
         if (err.isRenderWakingUp || msg.includes("waking up") || msg.includes("starting up")) {
           this.showWakeupNotice("login", () => {
             document.getElementById("loginForm")?.dispatchEvent(new Event("submit", { cancelable: true }));
           });
-          window.App.showToast("Server waking up on Render...", "info");
           return;
         }
         if (
@@ -105,7 +103,6 @@ class AuthManager {
           msg.toLowerCase().includes("register first")
         ) {
           this.showLoginAlert("Mobile number is not registered. Redirecting to registration...", "info");
-          window.App.showToast("Mobile number not registered", "info");
           const regMobile = document.getElementById("regMobile");
           if (regMobile) regMobile.value = mobile;
           setTimeout(() => {
@@ -114,7 +111,6 @@ class AuthManager {
           }, 800);
         } else {
           this.showLoginAlert(msg, "error");
-          window.App.showToast(msg, "error");
         }
       } finally {
         if (submitBtn) {
@@ -191,19 +187,16 @@ class AuthManager {
         const msg = err.message || "Registration failed";
         if (err.isMissingApiUrl || msg.includes("No backend API configured")) {
           this.showConnectionHelper("register");
-          window.App.showToast("Backend server not connected", "warning");
           return;
         }
         if (err.isRenderWakingUp || msg.includes("waking up") || msg.includes("starting up")) {
           this.showWakeupNotice("register", () => {
             document.getElementById("registerForm")?.dispatchEvent(new Event("submit", { cancelable: true }));
           });
-          window.App.showToast("Server waking up on Render...", "info");
           return;
         }
         if (msg.toLowerCase().includes("already registered")) {
           this.showRegAlert("Mobile number is already registered. Redirecting to login...", "info");
-          window.App.showToast("Mobile number already registered", "info");
           const loginMobile = document.getElementById("loginMobile");
           if (loginMobile) loginMobile.value = mobile;
           setTimeout(() => {
@@ -212,7 +205,6 @@ class AuthManager {
           }, 800);
         } else {
           this.showRegAlert(msg, "error");
-          window.App.showToast(msg, "error");
         }
       } finally {
         if (submitBtn) {
@@ -514,7 +506,10 @@ class AuthManager {
 
   showLoginAlert(message, type = "error") {
     const alertBox = document.getElementById("loginAlertBox");
-    if (!alertBox) return;
+    if (!alertBox) {
+      if (message) window.App.showToast(message, type);
+      return;
+    }
     if (!message) {
       alertBox.style.display = "none";
       alertBox.textContent = "";
@@ -523,11 +518,15 @@ class AuthManager {
     alertBox.textContent = message;
     alertBox.className = `otp-alert-box ${type}`;
     alertBox.style.display = "block";
+    window.App?.clearToasts();
   }
 
   showRegAlert(message, type = "error") {
     const alertBox = document.getElementById("regAlertBox");
-    if (!alertBox) return;
+    if (!alertBox) {
+      if (message) window.App.showToast(message, type);
+      return;
+    }
     if (!message) {
       alertBox.style.display = "none";
       alertBox.textContent = "";
@@ -536,9 +535,11 @@ class AuthManager {
     alertBox.textContent = message;
     alertBox.className = `otp-alert-box ${type}`;
     alertBox.style.display = "block";
+    window.App?.clearToasts();
   }
 
   showConnectionHelper(screenType = "login") {
+    window.App?.clearToasts();
     const alertBox = document.getElementById(screenType === "login" ? "loginAlertBox" : "regAlertBox");
     if (!alertBox) return;
 
@@ -616,6 +617,7 @@ class AuthManager {
   }
 
   showWakeupNotice(screenType = "login", onRetryCallback) {
+    window.App?.clearToasts();
     const alertBox = document.getElementById(screenType === "login" ? "loginAlertBox" : "regAlertBox");
     if (!alertBox) return;
 
@@ -667,6 +669,7 @@ class AuthManager {
     this.clearAlert();
     this.showLoginAlert("", "none");
     this.showRegAlert("", "none");
+    window.App?.clearToasts();
   }
 
   showAlert(message, type = "error") {

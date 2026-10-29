@@ -140,3 +140,17 @@ def test_frontend_displays_demo_otp_only_when_backend_reports_mock_delivery():
     assert 'devCard.style.display = "none"' in auth_js, "auth.js must hide devCard when not mock"
 
 
+def test_toast_notifications_deduplicated_and_do_not_stack():
+    """Verify toast notification anti-stacking and deduplication in app.js and auth.js."""
+    app_js = (FRONTEND_DIR / "js" / "app.js").read_text(encoding="utf-8")
+    auth_js = (FRONTEND_DIR / "js" / "auth.js").read_text(encoding="utf-8")
+
+    # Anti-stacking enforcement in app.js
+    assert "clearToasts" in app_js, "Missing clearToasts method in app.js"
+    assert "container.removeChild(container.firstChild)" in app_js, "showToast must cap visible toasts"
+
+    # Inline alert integration in auth.js
+    assert "window.App?.clearToasts()" in auth_js, "auth.js must clear floating toasts when displaying inline form alerts"
+
+
+

@@ -213,9 +213,29 @@ class Application {
     if (contentEl) contentEl.scrollTop = 0;
   }
 
+  clearToasts() {
+    const container = document.getElementById("toastContainer");
+    if (container) {
+      container.innerHTML = "";
+    }
+  }
+
   showToast(message, type = "info") {
     const container = document.getElementById("toastContainer");
-    if (!container) return;
+    if (!container || !message) return;
+
+    // Deduplicate and prevent toast stacking over form fields
+    const existing = Array.from(container.querySelectorAll(".toast"));
+    for (const t of existing) {
+      if (t.textContent === message || (type === "error" && t.classList.contains("toast-error"))) {
+        t.remove();
+      }
+    }
+
+    // Never allow more than 1 toast visible at a time
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
 
     const toast = document.createElement("div");
     toast.className = `toast toast-${type}`;
@@ -225,8 +245,8 @@ class Application {
 
     setTimeout(() => {
       toast.classList.add("fade-out");
-      setTimeout(() => toast.remove(), 300);
-    }, 3200);
+      setTimeout(() => toast.remove(), 250);
+    }, 2800);
   }
 
   showLoading(visible = true) {
