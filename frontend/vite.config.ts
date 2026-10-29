@@ -18,7 +18,7 @@ function copyStaticPlugin(): Plugin {
 
       // Inject build-time API base URL into dist/js/config.js if provided
       const configDistPath = path.join(distDir, 'js', 'config.js');
-      let apiUrl = (process.env.VITE_API_BASE_URL || '').trim().replace(/\/+$/, '');
+      let apiUrl = (process.env.VITE_API_BASE_URL || 'https://arogya-lens-y01v.onrender.com').trim().replace(/\/+$/, '');
       if (apiUrl.startsWith('http://') && !apiUrl.includes('localhost') && !apiUrl.includes('127.0.0.1')) {
         apiUrl = apiUrl.replace(/^http:\/\//, 'https://');
       }
@@ -52,7 +52,7 @@ function copyStaticPlugin(): Plugin {
 export default defineConfig({
   base: process.env.VITE_BASE_PATH || './',
   define: {
-    '__API_BASE_URL__': JSON.stringify(process.env.VITE_API_BASE_URL || '')
+    '__API_BASE_URL__': JSON.stringify(process.env.VITE_API_BASE_URL || 'https://arogya-lens-y01v.onrender.com')
   },
   plugins: [copyStaticPlugin()],
   server: {

@@ -27,9 +27,9 @@ const getApiBaseUrl = () => {
 
   const hostname = window.location.hostname || '127.0.0.1';
 
-  // 3. GitHub Pages: Default to empty string for standalone offline demo mode
+  // 3. GitHub Pages: Default to production backend URL
   if (hostname.endsWith('github.io')) {
-    return '';
+    return 'https://arogya-lens-y01v.onrender.com';
   }
 
   // 4. Local development or container environments:

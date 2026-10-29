@@ -47,7 +47,7 @@ jobs:
 
       - name: Validate Production API Configuration
         run: |
-          API_URL="${{ inputs.api_base_url || vars.VITE_API_BASE_URL || '' }}"
+          API_URL="${{ inputs.api_base_url || vars.VITE_API_BASE_URL || 'https://arogya-lens-y01v.onrender.com' }}"
           # Trim whitespace and trailing slashes
           API_URL=$(echo "$API_URL" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//;s:/*$::')
 
