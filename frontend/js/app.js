@@ -10,6 +10,9 @@ class Application {
   }
 
   async init() {
+    if (this._initialized) return;
+    this._initialized = true;
+
     // Initialize component controllers
     window.I18N.updateDOM();
     window.Auth.init();
@@ -239,8 +242,18 @@ class Application {
     const overlay = document.getElementById("globalLoadingOverlay");
     if (overlay) {
       overlay.style.display = visible ? "flex" : "none";
+      overlay.style.pointerEvents = visible ? "auto" : "none";
     }
   }
 }
 
 window.App = new Application();
+
+// Reliable DOM-ready initialization across all browser environments
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    window.App.init();
+  });
+} else {
+  window.App.init();
+}

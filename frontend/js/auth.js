@@ -14,6 +14,8 @@ class AuthManager {
   }
 
   init() {
+    if (this._initialized) return;
+    this._initialized = true;
     this.bindEvents();
     this.setupOtpInputBehaviors();
   }
@@ -50,10 +52,14 @@ class AuthManager {
     // Login Form Submit (Send OTP)
     document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
+      this.clearErrors();
+
       const mobileInput = document.getElementById("loginMobile");
-      const mobile = mobileInput?.value?.trim();
+      const rawMobile = mobileInput?.value?.trim() || "";
+      const mobile = this.cleanMobile(rawMobile);
 
       if (!this.validateMobile(mobile)) {
+        this.showLoginAlert("Please enter a valid 10-digit mobile number.", "error");
         window.App.showToast("Please enter a valid 10-digit mobile number", "error");
         mobileInput?.focus();
         return;
@@ -73,11 +79,15 @@ class AuthManager {
       } catch (err) {
         const msg = err.message || "Failed to send OTP";
         if (msg.includes("No backend API")) {
-          window.App.showToast("Arogya Lens backend server is not connected. Please deploy or connect the backend service.", "error");
+          const exp = "Arogya Lens backend server is not connected. To enable live login, deploy the FastAPI backend or configure VITE_API_BASE_URL.";
+          this.showLoginAlert(exp, "error");
+          window.App.showToast("Backend server unavailable", "error");
           return;
         }
         if (msg.includes("Unable to connect")) {
-          window.App.showToast("Unable to connect to Arogya Lens API server. Please check your connection or verify the server is running.", "error");
+          const exp = "Unable to connect to Arogya Lens API server. Please check your internet connection or verify the backend service is running.";
+          this.showLoginAlert(exp, "error");
+          window.App.showToast("Cannot reach server", "error");
           return;
         }
         if (
@@ -85,7 +95,8 @@ class AuthManager {
           msg.toLowerCase().includes("not found") ||
           msg.toLowerCase().includes("register first")
         ) {
-          window.App.showToast("Mobile number not registered. Redirecting to registration...", "info");
+          this.showLoginAlert("Mobile number is not registered. Redirecting to registration...", "info");
+          window.App.showToast("Mobile number not registered", "info");
           const regMobile = document.getElementById("regMobile");
           if (regMobile) regMobile.value = mobile;
           setTimeout(() => {
@@ -93,6 +104,7 @@ class AuthManager {
             document.getElementById("regName")?.focus();
           }, 800);
         } else {
+          this.showLoginAlert(msg, "error");
           window.App.showToast(msg, "error");
         }
       } finally {
@@ -107,22 +119,28 @@ class AuthManager {
     // Registration Form Submit (Send OTP & Register)
     document.getElementById("registerForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
+      this.clearErrors();
+
       const name = document.getElementById("regName")?.value?.trim();
-      const mobile = document.getElementById("regMobile")?.value?.trim();
+      const rawMobile = document.getElementById("regMobile")?.value?.trim() || "";
+      const mobile = this.cleanMobile(rawMobile);
       const age = parseInt(document.getElementById("regAge")?.value, 10);
       const sex = document.getElementById("regSex")?.value;
 
       if (!name || name.length < 2) {
-        window.App.showToast("Please enter a valid full name (minimum 2 characters)", "error");
+        this.showRegAlert("Please enter a valid full name (minimum 2 characters).", "error");
+        window.App.showToast("Please enter a valid full name", "error");
         document.getElementById("regName")?.focus();
         return;
       }
       if (!this.validateMobile(mobile)) {
+        this.showRegAlert("Please enter a valid 10-digit mobile number.", "error");
         window.App.showToast("Please enter a valid 10-digit mobile number", "error");
         document.getElementById("regMobile")?.focus();
         return;
       }
       if (!age || age < 1 || age > 120) {
+        this.showRegAlert("Please enter a valid age between 1 and 120.", "error");
         window.App.showToast("Please enter a valid age (1-120)", "error");
         document.getElementById("regAge")?.focus();
         return;
@@ -144,15 +162,20 @@ class AuthManager {
       } catch (err) {
         const msg = err.message || "Registration failed";
         if (msg.includes("No backend API")) {
-          window.App.showToast("Arogya Lens backend server is not connected. Please deploy or connect the backend service.", "error");
+          const exp = "Arogya Lens backend server is not connected. To register, deploy the FastAPI backend or configure VITE_API_BASE_URL.";
+          this.showRegAlert(exp, "error");
+          window.App.showToast("Backend server unavailable", "error");
           return;
         }
         if (msg.includes("Unable to connect")) {
-          window.App.showToast("Unable to connect to Arogya Lens API server. Please check your connection or verify the server is running.", "error");
+          const exp = "Unable to connect to Arogya Lens API server. Please check your internet connection or verify the backend service is running.";
+          this.showRegAlert(exp, "error");
+          window.App.showToast("Cannot reach server", "error");
           return;
         }
         if (msg.toLowerCase().includes("already registered")) {
-          window.App.showToast("Mobile number is already registered. Redirecting to login...", "info");
+          this.showRegAlert("Mobile number is already registered. Redirecting to login...", "info");
+          window.App.showToast("Mobile number already registered", "info");
           const loginMobile = document.getElementById("loginMobile");
           if (loginMobile) loginMobile.value = mobile;
           setTimeout(() => {
@@ -160,6 +183,7 @@ class AuthManager {
             document.getElementById("loginMobile")?.focus();
           }, 800);
         } else {
+          this.showRegAlert(msg, "error");
           window.App.showToast(msg, "error");
         }
       } finally {
@@ -451,9 +475,37 @@ class AuthManager {
     });
   }
 
+  showLoginAlert(message, type = "error") {
+    const alertBox = document.getElementById("loginAlertBox");
+    if (!alertBox) return;
+    if (!message) {
+      alertBox.style.display = "none";
+      alertBox.textContent = "";
+      return;
+    }
+    alertBox.textContent = message;
+    alertBox.className = `otp-alert-box ${type}`;
+    alertBox.style.display = "block";
+  }
+
+  showRegAlert(message, type = "error") {
+    const alertBox = document.getElementById("regAlertBox");
+    if (!alertBox) return;
+    if (!message) {
+      alertBox.style.display = "none";
+      alertBox.textContent = "";
+      return;
+    }
+    alertBox.textContent = message;
+    alertBox.className = `otp-alert-box ${type}`;
+    alertBox.style.display = "block";
+  }
+
   clearErrors() {
     document.querySelectorAll(".otp-digit-input").forEach((i) => i.classList.remove("error"));
     this.clearAlert();
+    this.showLoginAlert("", "none");
+    this.showRegAlert("", "none");
   }
 
   showAlert(message, type = "error") {
@@ -476,9 +528,28 @@ class AuthManager {
     this.showAlert("", "none");
   }
 
+  cleanMobile(raw) {
+    if (!raw) return "";
+    let clean = String(raw).replace(/\D/g, "");
+    if (clean.length === 12 && clean.startsWith("91")) {
+      clean = clean.slice(2);
+    }
+    return clean;
+  }
+
   validateMobile(num) {
-    return /^[6-9]\d{9}$/.test(num);
+    const clean = this.cleanMobile(num);
+    return clean.length >= 10 && clean.length <= 15;
   }
 }
 
 window.Auth = new AuthManager();
+
+// Defensive initialization across script loading orders
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
+    window.Auth.init();
+  });
+} else {
+  window.Auth.init();
+}

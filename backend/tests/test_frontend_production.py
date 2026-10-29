@@ -83,3 +83,21 @@ def test_production_build_injection_of_valid_https_url():
     index_html = (DIST_DIR / "index.html").read_text(encoding="utf-8")
     assert test_url in index_html, "Production API URL was not injected into dist/index.html"
 
+
+def test_initialization_scripts_are_invoked():
+    """Verify that App.init() and Auth.init() are called reliably on DOM load."""
+    app_js = (FRONTEND_DIR / "js" / "app.js").read_text(encoding="utf-8")
+    assert "window.App.init()" in app_js, "Missing window.App.init() invocation in app.js"
+    assert "DOMContentLoaded" in app_js, "Missing DOMContentLoaded handler in app.js"
+
+    auth_js = (FRONTEND_DIR / "js" / "auth.js").read_text(encoding="utf-8")
+    assert "window.Auth.init()" in auth_js, "Missing window.Auth.init() invocation in auth.js"
+
+
+def test_form_alert_containers_exist():
+    """Verify inline feedback containers exist in index.html for login and registration."""
+    index_html = (FRONTEND_DIR / "index.html").read_text(encoding="utf-8")
+    assert "loginAlertBox" in index_html, "Missing loginAlertBox in index.html"
+    assert "regAlertBox" in index_html, "Missing regAlertBox in index.html"
+    assert "otpAlertBox" in index_html, "Missing otpAlertBox in index.html"
+
